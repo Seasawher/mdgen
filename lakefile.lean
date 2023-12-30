@@ -21,8 +21,16 @@ partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
     (← fp.readDir).foldlM (fun acc dir => getLeanFilePaths dir.path acc) acc
   else return if fp.extension == some "lean" then acc.push fp else acc
 
--- def convertToMd (content : String) : String := Id.run do
---   return content
+def convertToMd (content : String) : String := Id.run do
+  return content
+
+/-- create a file with given path and content. -/
+def createFile (path : FilePath) (content : String) : IO Unit := do
+  match path.parent with
+  | none => IO.FS.writeFile path content
+  | some parent =>
+    IO.FS.createDirAll parent
+    IO.FS.writeFile path content
 
 script md_gen (args : List String) do
 
@@ -33,10 +41,10 @@ script md_gen (args : List String) do
   let inputDir : FilePath := args.get! 0
   let outputDir : FilePath := args.get! 1
 
-  let paths := ← getLeanFilePaths ⟨s!"{inputDir}"⟩
+  let paths := ← getLeanFilePaths inputDir
 
   for path in paths do
-    -- let content ← IO.FS.readFile path
+    let content ← IO.FS.readFile path
 
     let outputFilePath := outputDir.toString
       |> ( · :: path.components.drop 1)
@@ -45,7 +53,9 @@ script md_gen (args : List String) do
       |> (String.dropRight · 1)
       |> (String.replace · ".lean" ".md")
       |> FilePath.mk
+
     IO.println s!"outputFilePath: {outputFilePath}"
+    createFile outputFilePath $ convertToMd content
   return 0
 
 end md_gen
