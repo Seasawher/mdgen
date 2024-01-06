@@ -30,4 +30,4 @@ jobs:
         run: lake exe mdgen Test/Src Test/Out
 
       - name: run test
-        run: lake test test
+        run: lake exe test
