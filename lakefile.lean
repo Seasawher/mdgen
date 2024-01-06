@@ -17,7 +17,7 @@ lean_exe «mdgen» where
   root := `Mdgen
   supportInterpreter := true
 
-lean_exe test where
+lean_exe mdgen_test where
   -- executed when `lake exe test` runs
   root := `Test
   supportInterpreter := true
