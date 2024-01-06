@@ -3,7 +3,7 @@ open Lake DSL
 
 package «mdgen» where
   -- add package configuration options here
-    leanOptions := #[
+  leanOptions := #[
     ⟨`autoImplicit, false⟩,
     ⟨`relaxedAutoImplicit, false⟩
   ]
@@ -14,5 +14,5 @@ lean_lib «Mdgen» where
 @[default_target]
 lean_exe «mdgen» where
   -- executed when `lake exe mdgen` runs
-  root := `Main
+  root := `Mdgen
   supportInterpreter := true
