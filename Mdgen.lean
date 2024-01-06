@@ -18,11 +18,8 @@ def buildBlocks(lines : List String) : List Block := Id.run do
   let mut content := ""
   for ⟨i, line_n⟩ in lines.enum do
     let line := (line_n.splitOn "\n")[0]!
-
-    -- ignore a line ending with `--#`
     if line.endsWith "--#" then
       continue
-
     if line.startsWith "/-" && ! line.startsWith "/--" then
       if ! readingLeanCode then
         panic!
@@ -45,7 +42,7 @@ def buildBlocks(lines : List String) : List Block := Id.run do
       blocks := blocks ++ [{content := content.trim, isCode := false}]
       content := ""
     else
-      content := line ++ "\n"
+      content := content ++ line ++ "\n"
   if content != "" then
     blocks := blocks ++ [{content := content.trim, isCode := true}]
   return blocks
