@@ -71,6 +71,26 @@ def createFile (path : FilePath) (content : String) : IO Unit := do
     IO.FS.createDirAll parent
     IO.FS.writeFile path content
 
+/-- A new list created by removing the matching parts of two lists from the beginning. -/
+def List.diff (as : List String) (bs : List String) : List String :=
+  match as, bs with
+  | [], [] => []
+  | a, [] => a
+  | [], _ => []
+  | a :: as, b :: bs => if a == b then List.diff as bs else a :: as
+
+example : List.diff ["test", "src", "first"] ["test", "out"] = ["src", "first"] := rfl
+
+def outputFilePath (outputDir : FilePath) (path : FilePath) : FilePath :=
+  path.components.diff outputDir.components
+    |> List.drop 1
+    |> ( outputDir.components ++ ·)
+    |> List.map (· ++ FilePath.pathSeparator.toString)
+    |> List.foldl (· ++ ·) ""
+    |> (String.dropRight · 1)
+    |> (String.replace · ".lean" ".md")
+    |> FilePath.mk
+
 def main (args : List String) : IO UInt32 := do
   if args.length != 2 then
     IO.eprintln s!"usage: md_gen <input_dir> <output_dir>"
@@ -84,13 +104,7 @@ def main (args : List String) : IO UInt32 := do
   for path in paths do
     let content ← IO.FS.lines path
 
-    let outputFilePath := outputDir.toString
-      |> ( · :: path.components.drop 1)
-      |> List.map (· ++ FilePath.pathSeparator.toString)
-      |> List.foldl (· ++ ·) ""
-      |> (String.dropRight · 1)
-      |> (String.replace · ".lean" ".md")
-      |> FilePath.mk
+    let outputFilePath := outputFilePath outputDir path
 
     createFile outputFilePath $ convertToMd content.toList
   return 0
