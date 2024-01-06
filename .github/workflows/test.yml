@@ -26,8 +26,7 @@ jobs:
       - name: build
         run: lake build
 
-      - name: run mdgen
-        run: lake exe mdgen Test/Src Test/Out
-
       - name: run test
-        run: lake exe test
+        run: |
+          lake exe mdgen Test/Src Test/Out
+          lake exe test
