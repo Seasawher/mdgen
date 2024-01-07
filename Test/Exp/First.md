@@ -8,7 +8,12 @@ example (hQ : Q) : P → Q := by
   exact hQ
 ```
 
-this is a very easy exercise.
+this is a very easy exercise
+and this is a test of
+multiline comments.
+* sample
+* foo
+* bar
 
 ```lean
 example (h : P) : P ∨ Q := by

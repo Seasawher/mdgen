@@ -6,7 +6,13 @@ example (hQ : Q) : P → Q := by
   intro _
   exact hQ
 
-/-! this is a very easy exercise. -/
+/-! this is a very easy exercise
+and this is a test of
+multiline comments.
+* sample
+* foo
+* bar
+-/
 
 example (h : P) : P ∨ Q := by
   apply Or.inl

@@ -15,7 +15,3 @@ lean_lib «Mdgen» where
 lean_exe «mdgen» where
   root := `Mdgen
   supportInterpreter := true
-
-lean_exe mdgen_test where
-  root := `Test
-  supportInterpreter := true
