@@ -13,11 +13,9 @@ lean_lib «Mdgen» where
 
 @[default_target]
 lean_exe «mdgen» where
-  -- executed when `lake exe mdgen` runs
   root := `Mdgen
   supportInterpreter := true
 
 lean_exe mdgen_test where
-  -- executed when `lake exe test` runs
   root := `Test
   supportInterpreter := true
