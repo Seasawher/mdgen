@@ -1,7 +1,7 @@
 /-! # how to test
 
 1. first, run `lake exe mdgen Test/Src Test/Out`
-2. run `lake exe test`
+2. run `lake exe mdgen_test`
 -/
 
 def main : IO UInt32 := do
