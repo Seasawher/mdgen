@@ -93,7 +93,7 @@ def outputFilePath (outputDir : FilePath) (path : FilePath) : FilePath :=
 
 def main (args : List String) : IO UInt32 := do
   if args.length != 2 then
-    IO.eprintln s!"usage: md_gen <input_dir> <output_dir>"
+    IO.eprintln s!"usage: mdgen <input_dir> <output_dir>"
     return 1
 
   let inputDir : FilePath := args.get! 0
