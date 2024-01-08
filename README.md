@@ -17,15 +17,18 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 `mdgen` has the following features:
 
-* The comments enclosed with an `/-! ... -/` are converted as ground text.
+* The comments enclosed with an `/-! ... -/` or `/- ... -/` are converted as ground text.
 
-* The non-comment parts of the `.lean` file are converted to lean code blocks.
+* The inline comment, doc comment and non-comment parts are converted to lean code blocks.
 
 * Lines ending with `--#` are ignored.
 
 * Directories within `input_dir` will also be converted.
 
-If you want to know more details, check the test code. Files under the `Test/Src` directory will look like files under `Test/Exp` when converted.
+If you want to know more details, check the test code.
+
+* [source](./Test/Src/First.lean)
+* [expected output](./Test/Exp/First.md)
 
 ## Acknowledgments
 
