@@ -1,4 +1,4 @@
-import Mdgen.Base
+import Mdgen.File
 import Mdgen.ConvertToMd
 
 open Lake DSL System
@@ -17,16 +17,6 @@ private def createFile (path : FilePath) (content : String) : IO Unit := do
     IO.FS.createDirAll parent
     IO.FS.writeFile path content
 
-private def outputFilePath (outputDir : FilePath) (path : FilePath) : FilePath :=
-  path.components.diff outputDir.components
-    |> List.drop 1
-    |> ( outputDir.components ++ ·)
-    |> List.map (· ++ FilePath.pathSeparator.toString)
-    |> List.foldl (· ++ ·) ""
-    |> (String.dropRight · 1)
-    |> (String.replace · ".lean" ".md")
-    |> FilePath.mk
-
 def main (args : List String) : IO UInt32 := do
   if args.length != 2 then
     IO.eprintln s!"usage: mdgen <input_dir> <output_dir>"
@@ -40,7 +30,7 @@ def main (args : List String) : IO UInt32 := do
   for path in paths do
     let content ← IO.FS.lines path
 
-    let outputFilePath := outputFilePath outputDir path
+    let outputFilePath := outputFilePath inputDir.components outputDir.components path.components
 
-    createFile outputFilePath $ convertToMd content.toList
+    createFile (genPath outputFilePath) (convertToMd content.toList)
   return 0
