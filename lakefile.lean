@@ -14,4 +14,3 @@ lean_lib «Mdgen» where
 @[default_target]
 lean_exe «mdgen» where
   root := `Mdgen
-  supportInterpreter := true

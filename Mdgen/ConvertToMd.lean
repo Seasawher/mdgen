@@ -1,6 +1,4 @@
-import Lake
-
-open Lake DSL System
+open System
 
 structure Block where
   content : String

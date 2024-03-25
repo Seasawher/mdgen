@@ -1,6 +1,4 @@
-import Lake
-
-open Lake DSL System
+open System
 
 /-- A new list created by removing the matching parts of two lists from the beginning. -/
 private def List.diff (as : List String) (bs : List String) : List String :=

@@ -1,7 +1,7 @@
 import Mdgen.File
 import Mdgen.ConvertToMd
 
-open Lake DSL System
+open System
 
 private partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
     IO $ Array FilePath := do
