@@ -64,88 +64,89 @@ def convertToMd (lines : List String) : String :=
 def List.withBreakLine (as : List String) : String :=
   as.map (· ++ "\n") |> foldl (· ++ ·) ""
 
-def inlineComment := ["-- this is a test"]
+def runTest (input : List String) (expected : List String) (title := "") : IO Unit :=
+  let output := convertToMd input
+  if output = expected.withBreakLine then
+    IO.println s!"{title} test passed!"
+  else
+    throw <| .userError s!"Test failed: {output}"
 
-def inlineCommentExpected := [
-  "```lean",
-  "-- this is a test",
-  "```"
-].withBreakLine
+#eval runTest
+  (title := "inline comment")
+  ["-- this is a test"]
+  [
+    "```lean",
+    "-- this is a test",
+    "```"
+  ]
 
-example : convertToMd inlineComment = inlineCommentExpected := rfl
+#eval runTest
+  (title := "module document")
+  ["/-! # This is a test -/"]
+  ["# This is a test"]
 
-def sectionComment := ["/-! # This is a test -/"]
+#eval runTest
+  (title := "multi line sectioning comment")
+  [
+    "/-! # This is a test",
+    "of multiline section comment -/"
+  ]
+  [
+    "# This is a test",
+    "of multiline section comment"
+  ]
 
-def sectionCommentExpected := ["# This is a test"].withBreakLine
+#eval runTest
+  (title := "empty lines")
+  ["/-! test -/", "", "", ""]
+  ["test"]
 
-example : convertToMd sectionComment = sectionCommentExpected := rfl
+#eval runTest
+  (title := "ignored lines")
+  ["this is ignored --#", "this is also ignored --#"]
+  [""]
 
-def sectionCommentMulti := [
-  "/-! # This is a test",
-  "of multiline section comment -/"
-]
+#eval runTest
+  (title := "doc comment")
+  [
+    "/-- This is a test -/",
+    "def foo := 0"
+  ]
+  [
+    "```lean",
+    "/-- This is a test -/",
+    "def foo := 0",
+    "```"
+  ]
 
-def sectionCommentMultiExpected := [
-  "# This is a test",
-  "of multiline section comment"
-].withBreakLine
+#eval runTest
+  (title := "multi line doc comment")
+  [
+    "/-- This is a test",
+    "of multiline doc comment -/",
+    "def foo := 0"
+  ]
+  [
+    "```lean",
+    "/-- This is a test",
+    "of multiline doc comment -/",
+    "def foo := 0",
+    "```"
+  ]
 
-example : convertToMd sectionCommentMulti = sectionCommentMultiExpected := rfl
+#eval runTest
+  (title := "block comment")
+  ["/- this is a test -/"]
+  ["this is a test"]
 
-def manyEmptyLines := ["/-! test -/", "", "", ""]
-
-def manyEmptyLinesExpected := ["test"].withBreakLine
-
-example : convertToMd manyEmptyLines = manyEmptyLinesExpected := rfl
-
-def ignoreLine := ["this is ignored --#", "this is also ignored --#"]
-
-def ignoreLineExpected := "\n"
-
-example : convertToMd ignoreLine = ignoreLineExpected := rfl
-
-def docComment := ["/-- This is a test -/", "def foo := 0"]
-
-def docCommentExpected := [
-  "```lean",
-  "/-- This is a test -/",
-  "def foo := 0",
-  "```"
-].withBreakLine
-
-example : convertToMd docComment = docCommentExpected := rfl
-
-def docCommentMulti := [
-  "/-- This is a test",
-  "of multiline doc comment -/",
-  "def foo := 0"
-]
-
-def docCommentMultiExpected := [
-  "```lean",
-  "/-- This is a test",
-  "of multiline doc comment -/",
-  "def foo := 0",
-  "```"
-].withBreakLine
-
-example : convertToMd docCommentMulti = docCommentMultiExpected := rfl
-
-def blockComment := ["/- this is a test -/"]
-
-def blockCommentExpected := ["this is a test"].withBreakLine
-
-example : convertToMd blockComment = blockCommentExpected := rfl
-
-def blockCommentMulti := [
-  "/-",
-  "this is a test",
-  "of multiline block comment -/"
-]
-
-def blockCommentMultiExpected := [
-  "this is a test",
-  "of multiline block comment"
-].withBreakLine
-
-example : convertToMd blockCommentMulti = blockCommentMultiExpected := rfl
+#eval runTest
+  (title := "multi line block comment")
+  [
+    "/-",
+    "this is a test",
+    "of multiline block comment -/"
+  ]
+  [
+    "this is a test",
+    "of multiline block comment"
+  ]
