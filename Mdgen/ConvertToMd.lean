@@ -51,9 +51,9 @@ private def mergeBlocks (blocks : List Block) : String := Id.run do
   return res.trim ++ "\n"
 
 /-- convert lean contents to markdown contents. -/
-def convertToMd (lines : List String) : String := Id.run do
+def convertToMd (lines : List String) : String :=
   let blocks := buildBlocks lines
-  return mergeBlocks blocks
+  mergeBlocks blocks
 
 def List.withBreakLine (as : List String) : String :=
   as.map (· ++ "\n") |> foldl (· ++ ·) ""
