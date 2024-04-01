@@ -45,16 +45,19 @@ private def buildBlocks(lines : List String) : List Block := Id.run do
     blocks ++= [{content := content.trim, isCode := true}]
   return blocks
 
-private def mergeBlocks (blocks : List Block) : String := Id.run do
-  let mut res := ""
-  for block in blocks do
-    if block.content = "" then
-      continue
-    if block.isCode then
-      res ++= "```lean\n" ++ block.content ++ "\n```\n\n"
-    else
-      res ++= block.content ++ "\n\n"
-  return res.trim ++ "\n"
+private def Block.toString (b : Block) : String :=
+  if b.content == "" then
+    ""
+  else if b.isCode then
+    "```lean\n" ++ b.content ++ "\n```\n\n"
+  else
+    b.content ++ "\n\n"
+
+private def mergeBlocks (blocks : List Block) : String :=
+  let res := blocks
+    |>.map Block.toString
+    |>.foldl (· ++ ·) ""
+  res.trim ++ "\n"
 
 /-- convert lean contents to markdown contents. -/
 def convertToMd (lines : List String) : String :=
