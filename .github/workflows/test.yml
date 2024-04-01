@@ -24,10 +24,7 @@ jobs:
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: build
-        run: lake build
-
-      - name: run mdgen
-        run: lake exe mdgen Test/Src Test/Out
+        run: lake build --quiet
 
       - name: run test
-        run: lean --run Test.lean
+        run: lake run test
