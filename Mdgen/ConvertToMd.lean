@@ -8,7 +8,7 @@ macro_rules
 
 structure Block where
   content : String
-  isCode : Bool
+  toCodeBlock : Bool
 
 private def buildBlocks(lines : List String) : List Block := Id.run do
   let mut readingLeanCode := true
@@ -23,7 +23,7 @@ private def buildBlocks(lines : List String) : List Block := Id.run do
         panic!
           "Nested lean commentary sections not allowed in:\n" ++
           s!" line {i+1}: {line}"
-      blocks ++= [{content := content.trim, isCode := true}]
+      blocks ++= [{content := content.trim, toCodeBlock := true}]
       readingLeanCode := false
       content := (if line.startsWith "/-!" then "/-!" else "/-")
         |> (String.splitOn line ·)
@@ -31,24 +31,24 @@ private def buildBlocks(lines : List String) : List Block := Id.run do
         |> (· ++ "\n")
       if line.endsWith "-/" then
         content := (content.splitOn "-/")[0]!
-        blocks ++= [{content := content.trim, isCode := false}]
+        blocks ++= [{content := content.trim, toCodeBlock := false}]
         readingLeanCode := true
         content := ""
     else if line.endsWith "-/" && ! readingLeanCode then
       content ++= (line.splitOn "-/")[0]!
       readingLeanCode := true
-      blocks ++= [{content := content.trim, isCode := false}]
+      blocks ++= [{content := content.trim, toCodeBlock := false}]
       content := ""
     else
       content ++= line ++ "\n"
   if content != "" then
-    blocks ++= [{content := content.trim, isCode := true}]
+    blocks ++= [{content := content.trim, toCodeBlock := true}]
   return blocks
 
 private def Block.toString (b : Block) : String :=
   if b.content == "" then
     ""
-  else if b.isCode then
+  else if b.toCodeBlock then
     "```lean\n" ++ b.content ++ "\n```\n\n"
   else
     b.content ++ "\n\n"
