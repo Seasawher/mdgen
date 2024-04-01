@@ -8,9 +8,9 @@ private def List.diff (as : List String) (bs : List String) : List String :=
   | [], _ => []
   | a :: as, b :: bs => if a == b then List.diff as bs else a :: as
 
-example : List.diff ["test", "src", "first"] ["test", "src"] = ["first"] := rfl
+#guard List.diff ["test", "src", "first"] ["test", "src"] = ["first"]
 
-example : List.diff ["test", "src", "first"] ["test", "out"] = ["src", "first"] := rfl
+#guard List.diff ["test", "src", "first"] ["test", "out"] = ["src", "first"]
 
 /-- a function which returns an output file path component
 given components of input and output directories. -/
@@ -21,15 +21,15 @@ def outputFilePath (inputDir : List String) (outputDir : List String)
     |> List.map (String.replace · ".lean" ".md")
     |> List.filter (· ≠ ".")
 
-example : outputFilePath ["."] ["out"] ["foo.lean"] = ["out", "foo.md"] := by rfl
+#guard outputFilePath ["."] ["out"] ["foo.lean"] = ["out", "foo.md"]
 
-example : outputFilePath ["src"] ["."] ["src", "foo.lean"] = ["foo.md"] := by rfl
+#guard outputFilePath ["src"] ["."] ["src", "foo.lean"] = ["foo.md"]
 
-example : outputFilePath ["src"] ["out"] ["src", "foo.lean"] = ["out", "foo.md"] := by rfl
+#guard outputFilePath ["src"] ["out"] ["src", "foo.lean"] = ["out", "foo.md"]
 
-example : outputFilePath ["test", "src"] ["test", "out"] ["test", "src", "foo.lean"] = ["test", "out", "foo.md"] := by rfl
+#guard outputFilePath ["test", "src"] ["test", "out"] ["test", "src", "foo.lean"] = ["test", "out", "foo.md"]
 
-example : outputFilePath ["src"] ["out", "dist"] ["src", "foo", "bar.lean"] = ["out", "dist", "foo", "bar.md"] := by rfl
+#guard outputFilePath ["src"] ["out", "dist"] ["src", "foo", "bar.lean"] = ["out", "dist", "foo", "bar.md"]
 
 /-- generate a filepath from path components -/
 def genPath (l : List String) : FilePath :=
