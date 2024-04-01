@@ -1,5 +1,11 @@
 open System
 
+/-- new notaion to represent `x := x ++ e`. -/
+syntax ident "++=" term : doElem
+
+macro_rules
+  | `(doElem| $x:ident ++= $e:term) => `(doElem| ($x) := ($x) ++ ($e))
+
 structure Block where
   content : String
   isCode : Bool
@@ -17,7 +23,7 @@ private def buildBlocks(lines : List String) : List Block := Id.run do
         panic!
           "Nested lean commentary sections not allowed in:\n" ++
           s!" line {i+1}: {line}"
-      blocks := blocks ++ [{content := content.trim, isCode := true}]
+      blocks ++= [{content := content.trim, isCode := true}]
       readingLeanCode := false
       content := (if line.startsWith "/-!" then "/-!" else "/-")
         |> (String.splitOn line ·)
@@ -25,18 +31,18 @@ private def buildBlocks(lines : List String) : List Block := Id.run do
         |> (· ++ "\n")
       if line.endsWith "-/" then
         content := (content.splitOn "-/")[0]!
-        blocks := blocks ++ [{content := content.trim, isCode := false}]
+        blocks ++= [{content := content.trim, isCode := false}]
         readingLeanCode := true
         content := ""
     else if line.endsWith "-/" && ! readingLeanCode then
-      content := content ++ (line.splitOn "-/")[0]!
+      content ++= (line.splitOn "-/")[0]!
       readingLeanCode := true
-      blocks := blocks ++ [{content := content.trim, isCode := false}]
+      blocks ++= [{content := content.trim, isCode := false}]
       content := ""
     else
-      content := content ++ line ++ "\n"
+      content ++= line ++ "\n"
   if content != "" then
-    blocks := blocks ++ [{content := content.trim, isCode := true}]
+    blocks ++= [{content := content.trim, isCode := true}]
   return blocks
 
 private def mergeBlocks (blocks : List Block) : String := Id.run do
@@ -45,9 +51,9 @@ private def mergeBlocks (blocks : List Block) : String := Id.run do
     if block.content = "" then
       continue
     if block.isCode then
-      res := res ++ "```lean\n" ++ block.content ++ "\n```\n\n"
+      res ++= "```lean\n" ++ block.content ++ "\n```\n\n"
     else
-      res := res ++ block.content ++ "\n\n"
+      res ++= block.content ++ "\n\n"
   return res.trim ++ "\n"
 
 /-- convert lean contents to markdown contents. -/
