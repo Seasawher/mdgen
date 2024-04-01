@@ -1,38 +1,44 @@
 /-
-# What is Lean?
-Lean is an *awesome* theorem prover.
-Please see [the website](https://leanprover.github.io/) for more information.
+# block comment in top of the file
+this is a block comment
 -/
-import Lake --#
 
-/-! ## Propositional Logic
-Lean can check mathematical proofs.
+-- this is a test of inline comment
+
+-- ignore these line --#
+import Lean --#
+
+/-! ## module comment
+this is a module comment
+-/
+
+/-! ## markdown content
+This is a list
+* first
+* second
+* third
+
+This is a [link](hoge).
+This is a **bold text**.
+This is a `inline code`.
+This is a block code:
+```lean
+def hoge : Nat := 0
+```
+This is an *italic text*.
 -/
 
 variable (P Q : Prop)
 
 example (hQ : Q) : P → Q := by
-  -- `_` is a proof of `P`, but we don't need it
+  -- test of lean codes
   intro _
   exact hQ
 
-/-- introducing `Or` -/
+/-- test of doc comment -/
 example (h : P) : P ∨ Q := by
+  /-
+  test of inner block comments
+  -/
   apply Or.inl
   exact h
-
-/-! ## Function
-Lean is
-* a purely functional programming language
-* an interactive theorem prover
-You can implement an algorithm and prove its correctness at the same time.
--/
-
-def fib : Nat → Nat
-  | 0 => 1
-  | 1 => 1
-  | n + 2 => fib n + fib (n + 1)
-
-example : fib 10 = 89 := rfl
-
--- Why don't you jump in the Lean World?
