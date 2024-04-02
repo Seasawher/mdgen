@@ -44,7 +44,7 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
       content ++= line ++ "\n"
 
   if content != "" then
-    blocks ++= [{content := content.trim, toCodeBlock := true}]
+    blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
   return blocks
 
 private def Block.toString (b : Block) : String :=
