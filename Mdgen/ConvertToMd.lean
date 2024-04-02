@@ -6,11 +6,13 @@ syntax ident "++=" term : doElem
 macro_rules
   | `(doElem| $x:ident ++= $e:term) => `(doElem| ($x) := ($x) ++ ($e))
 
+/-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
   content : String
   toCodeBlock : Bool
+  deriving Repr
 
-private def buildBlocks(lines : List String) : List Block := Id.run do
+private def buildBlocks (lines : List String) : List Block := Id.run do
   let mut readingLeanCode := true
   let mut blocks : List Block := []
   let mut content := ""
@@ -25,17 +27,14 @@ private def buildBlocks(lines : List String) : List Block := Id.run do
           s!" line {i+1}: {line}"
       blocks ++= [{content := content.trim, toCodeBlock := true}]
       readingLeanCode := false
-      content := (if line.startsWith "/-!" then "/-!" else "/-")
-        |> (String.splitOn line ·)
-        |> List.getLast!
-        |> (· ++ "\n")
+      content := line ++ "\n"
       if line.endsWith "-/" then
-        content := (content.splitOn "-/")[0]!
+        -- content := (content.splitOn "-/")[0]!
         blocks ++= [{content := content.trim, toCodeBlock := false}]
         readingLeanCode := true
         content := ""
     else if line.endsWith "-/" && ! readingLeanCode then
-      content ++= (line.splitOn "-/")[0]!
+      content ++= line
       readingLeanCode := true
       blocks ++= [{content := content.trim, toCodeBlock := false}]
       content := ""
@@ -51,7 +50,16 @@ private def Block.toString (b : Block) : String :=
   else if b.toCodeBlock then
     "```lean\n" ++ b.content ++ "\n```\n\n"
   else
-    b.content ++ "\n\n"
+    let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
+    b.content
+      |> (String.splitOn · separator)
+      |> List.drop 1
+      |> List.foldl (· ++ ·) ""
+      |> (String.splitOn · "-/")
+      |> List.dropLast
+      |> List.foldl (· ++ ·) ""
+      |> String.trim
+      |> (· ++ "\n\n")
 
 private def mergeBlocks (blocks : List Block) : String :=
   let res := blocks
