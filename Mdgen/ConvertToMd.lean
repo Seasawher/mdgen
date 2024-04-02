@@ -71,8 +71,10 @@ def convertToMd (lines : List String) : String :=
   let blocks := buildBlocks lines
   mergeBlocks blocks
 
-def List.withBreakLine (as : List String) : String :=
-  as.map (· ++ "\n") |> foldl (· ++ ·) ""
+namespace ConvertToMd
+
+def _root_.List.withBreakLine (as : List String) : String :=
+  as.map (· ++ "\n") |>.foldl (· ++ ·) ""
 
 def runTest (input : List String) (expected : List String) (title := "") : IO Unit :=
   let output := convertToMd input
@@ -160,3 +162,5 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "this is a test",
     "of multiline block comment"
   ]
+
+end ConvertToMd
