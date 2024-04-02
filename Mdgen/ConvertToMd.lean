@@ -29,7 +29,6 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
       readingLeanCode := false
       content := line ++ "\n"
       if line.endsWith "-/" then
-        -- content := (content.splitOn "-/")[0]!
         blocks ++= [{content := content.trim, toCodeBlock := false}]
         readingLeanCode := true
         content := ""
