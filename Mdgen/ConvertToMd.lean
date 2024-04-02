@@ -27,26 +27,26 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
           s!" line {i+1}: {line}"
 
       if content != "" then
-        blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+        blocks := {content := content.trim, toCodeBlock := toCodeBlock} :: blocks
       toCodeBlock := ! toCodeBlock
       content := line ++ "\n"
 
       if line.endsWith "-/" then
-        blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+        blocks := {content := content.trim, toCodeBlock := toCodeBlock} :: blocks
         toCodeBlock := ! toCodeBlock
         content := ""
 
     else if line.endsWith "-/" && ! toCodeBlock then
       content ++= line
-      blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+      blocks := {content := content.trim, toCodeBlock := toCodeBlock} :: blocks
       toCodeBlock := ! toCodeBlock
       content := ""
     else
       content ++= line ++ "\n"
 
   if content != "" then
-    blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
-  return blocks
+    blocks := {content := content.trim, toCodeBlock := toCodeBlock} :: blocks
+  return blocks.reverse
 
 /-- markdown text -/
 abbrev Md := String
