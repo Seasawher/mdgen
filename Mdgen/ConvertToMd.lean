@@ -20,25 +20,29 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
     let line := (line_with_br.splitOn "\n")[0]!
     if line.endsWith "--#" then
       continue
+
     if line.startsWith "/-" && ! line.startsWith "/--" then
       if ! toCodeBlock then
         panic!
           "Nested lean commentary sections not allowed in:\n" ++
           s!" line {i+1}: {line}"
-      blocks ++= [{content := content.trim, toCodeBlock := true}]
-      toCodeBlock := false
+      blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+      toCodeBlock := ! toCodeBlock
       content := line ++ "\n"
+
       if line.endsWith "-/" then
-        blocks ++= [{content := content.trim, toCodeBlock := false}]
-        toCodeBlock := true
+        blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+        toCodeBlock := ! toCodeBlock
         content := ""
+
     else if line.endsWith "-/" && ! toCodeBlock then
       content ++= line
-      toCodeBlock := true
-      blocks ++= [{content := content.trim, toCodeBlock := false}]
+      blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+      toCodeBlock := ! toCodeBlock
       content := ""
     else
       content ++= line ++ "\n"
+
   if content != "" then
     blocks ++= [{content := content.trim, toCodeBlock := true}]
   return blocks
