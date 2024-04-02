@@ -47,7 +47,10 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
     blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
   return blocks
 
-private def Block.toString (b : Block) : String :=
+/-- markdown text -/
+abbrev Md := String
+
+private def Block.toMd (b : Block) : Md :=
   if b.content == "" then
     ""
   else if b.toCodeBlock then
@@ -64,14 +67,14 @@ private def Block.toString (b : Block) : String :=
       |> String.trim
       |> (· ++ "\n\n")
 
-private def mergeBlocks (blocks : List Block) : String :=
+private def mergeBlocks (blocks : List Block) : Md :=
   let res := blocks
-    |>.map Block.toString
+    |>.map Block.toMd
     |>.foldl (· ++ ·) ""
   res.trim ++ "\n"
 
 /-- convert lean contents to markdown contents. -/
-def convertToMd (lines : List String) : String :=
+def convertToMd (lines : List String) : Md :=
   let blocks := buildBlocks lines
   mergeBlocks blocks
 
