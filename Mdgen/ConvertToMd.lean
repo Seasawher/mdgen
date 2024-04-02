@@ -16,8 +16,7 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
   let mut toCodeBlock := true
   let mut blocks : List Block := []
   let mut content := ""
-  for ⟨i, line_with_br⟩ in lines.enum do
-    let line := (line_with_br.splitOn "\n")[0]!
+  for ⟨i, line⟩ in lines.enum do
     if line.endsWith "--#" then
       continue
 
