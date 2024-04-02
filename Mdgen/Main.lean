@@ -30,7 +30,10 @@ def main (args : List String) : IO UInt32 := do
   for path in paths do
     let content ← IO.FS.lines path
 
-    let outputFilePath := outputFilePath inputDir.components outputDir.components path.components
+    let outputFilePath := outputFilePath
+      inputDir.components
+      outputDir.components
+      path.components
 
     createFile (genPath outputFilePath) (convertToMd content.toList)
   return 0
