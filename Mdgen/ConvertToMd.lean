@@ -13,7 +13,7 @@ structure Block where
   deriving Repr
 
 private def buildBlocks (lines : List String) : List Block := Id.run do
-  let mut readingLeanCode := true
+  let mut toCodeBlock := true
   let mut blocks : List Block := []
   let mut content := ""
   for ⟨i, line_with_br⟩ in lines.enum do
@@ -21,20 +21,20 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
     if line.endsWith "--#" then
       continue
     if line.startsWith "/-" && ! line.startsWith "/--" then
-      if ! readingLeanCode then
+      if ! toCodeBlock then
         panic!
           "Nested lean commentary sections not allowed in:\n" ++
           s!" line {i+1}: {line}"
       blocks ++= [{content := content.trim, toCodeBlock := true}]
-      readingLeanCode := false
+      toCodeBlock := false
       content := line ++ "\n"
       if line.endsWith "-/" then
         blocks ++= [{content := content.trim, toCodeBlock := false}]
-        readingLeanCode := true
+        toCodeBlock := true
         content := ""
-    else if line.endsWith "-/" && ! readingLeanCode then
+    else if line.endsWith "-/" && ! toCodeBlock then
       content ++= line
-      readingLeanCode := true
+      toCodeBlock := true
       blocks ++= [{content := content.trim, toCodeBlock := false}]
       content := ""
     else
