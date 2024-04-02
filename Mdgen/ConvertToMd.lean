@@ -25,7 +25,9 @@ private def buildBlocks (lines : List String) : List Block := Id.run do
         panic!
           "Nested lean commentary sections not allowed in:\n" ++
           s!" line {i+1}: {line}"
-      blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
+
+      if content != "" then
+        blocks ++= [{content := content.trim, toCodeBlock := toCodeBlock}]
       toCodeBlock := ! toCodeBlock
       content := line ++ "\n"
 
