@@ -171,4 +171,19 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "of multiline block comment"
   ]
 
+#eval runTest
+  (title := "respect indent")
+  [
+    "hoge",
+    "  fuga",
+    "  monyo",
+  ]
+  [
+    "```lean",
+    "hoge",
+    "  fuga",
+    "  monyo",
+    "```"
+  ]
+
 end ConvertToMd
