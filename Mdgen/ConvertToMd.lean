@@ -264,6 +264,17 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   ]
 
 #eval runTest
+  (title := "block comment repeated")
+  [
+    "/- hoge -/",
+    "/- fuga -/",
+  ]
+  [
+    "hoge",
+    "fuga"
+  ]
+
+#eval runTest
   (title := "nested block comment")
   [
     "/-",
