@@ -108,17 +108,15 @@ def listShift {α : Type} (x : List α × List α) : List α × List α :=
 partial def buildBlocks (lines : List RichLine) : List Block :=
   match lines with
   | [] => []
-  | line :: _ => Id.run do
+  | line :: _ =>
     let ⟨_, level, _⟩ := line
 
-    let mut splited := (
+    let splited := (
       if level == 0 then
         lines.span (fun x => x.level == 0)
       else
-        lines.span (fun x => x.level > 1 || ! x.close)
+        listShift <| lines.span (fun x => x.level > 1 || ! x.close)
     )
-    if level != 0 then
-      splited := listShift splited
     let fstBlock : Block := {
       content := splited.fst
         |>.map (·.content)
@@ -127,7 +125,7 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
         |>.trim,
       toCodeBlock := (level == 0)
     }
-    return fstBlock :: buildBlocks splited.snd
+    fstBlock :: buildBlocks splited.snd
 
 /-- markdown text -/
 abbrev Md := String
