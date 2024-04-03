@@ -34,4 +34,4 @@ If you want to know more details, check the test code.
 
 ## Acknowledgments
 
-Many parts of the code are copied from [lean2md](https://github.com/arthurpaulino/lean2md). Thank you [@arthurpaulino](https://github.com/arthurpaulino).
+I would like to acknowledge the author of [lean2md](https://github.com/arthurpaulino/lean2md), [@arthurpaulino](https://github.com/arthurpaulino).
