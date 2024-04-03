@@ -6,39 +6,42 @@ syntax ident "++=" term : doElem
 macro_rules
   | `(doElem| $x:ident ++= $e:term) => `(doElem| ($x) := ($x) ++ ($e))
 
-structure LeveledLine where
+structure RichLine where
   /-- text content -/
   content : String
 
   /-- nest level -/
   level : Nat
-  deriving Repr, BEq
 
-instance : ToString LeveledLine where
-  toString := fun l => s!"content: \n{l.content}\n, level: {l.level}"
+  /-- whether the line ends with the closing symbol or not. -/
+  close : Bool
+  deriving Repr, BEq, Inhabited
+
+instance : ToString RichLine where
+  toString := fun l => l.content
 
 /-- Receive a list of codes and count the nesting of block and sectioning comments.
 * The corresponding opening and closing brackets should have the same level.
 * Also handles the exclusion of ignored targets.
 -/
-def analysis (lines : List String) : List LeveledLine := Id.run do
+def analysis (lines : List String) : List RichLine := Id.run do
+  let mut res : List RichLine := []
   let mut level := 0
-  let mut res : List LeveledLine := []
   for line in lines do
     if line.endsWith "--#" then
       continue
     if line.startsWith "/-" && ! line.startsWith "/--" then
       level := level + 1
-    res := {content := line, level := level} :: res
+    res := {content := line, level := level, close := line.endsWith "-/"} :: res
     if line.endsWith "-/" then
       level := level - 1
   return res.reverse
 
 namespace analysis
 
-def runTest (input : List String) (expected : List Nat) (title := "") : IO Unit :=
+def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") : IO Unit :=
   let output := analysis input
-  if output.map (·.level) = expected then
+  if output.map (fun x => (x.level, x.close)) = expected then
     IO.println s!"{title} test passed!"
   else
     throw <| .userError s!"Test failed: \n{output}"
@@ -55,7 +58,7 @@ def runTest (input : List String) (expected : List Nat) (title := "") : IO Unit 
     "-/",
     "foo"
   ]
-  [1, 2, 2, 2, 2, 1, 1, 0]
+  [(1, false), (2, false), (2, true), (2, false), (2, true), (1, false), (1, true), (0, false)]
 
 #eval runTest
   (title := "sectioning comment and nested block comment")
@@ -65,7 +68,7 @@ def runTest (input : List String) (expected : List Nat) (title := "") : IO Unit 
     "-/",
     "def foo := 1",
   ]
-  [1, 2, 1, 0]
+  [(1, false), (2, true), (1, true), (0, false)]
 
 #eval runTest
   (title := "one line doc comment")
@@ -73,7 +76,7 @@ def runTest (input : List String) (expected : List Nat) (title := "") : IO Unit 
     "/-- hoge -/",
     "def hoge := \"hoge\"",
   ]
-  [0, 0]
+  [(0, true), (0, false)]
 
 #eval runTest
   (title := "multi line doc comment")
@@ -82,7 +85,7 @@ def runTest (input : List String) (expected : List Nat) (title := "") : IO Unit 
     "fuga -/",
     "def hoge := 42",
   ]
-  [0, 0, 0]
+  [(0, false), (0, true), (0, false)]
 
 end analysis
 
@@ -96,23 +99,35 @@ instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
-partial def buildBlocks (lines : List LeveledLine) : List Block :=
+def listShift {α : Type} (x : List α × List α) : List α × List α :=
+  let ⟨l, r⟩ := x
+  match r with
+  | [] => (l, [])
+  | y :: ys => (l ++ [y], ys)
+
+partial def buildBlocks (lines : List RichLine) : List Block :=
   match lines with
   | [] => []
-  | ⟨_, level₀⟩ :: _ =>
-    let (fst, snd) := if level₀ == 0
-        then lines.span (·.level == 0)
-        else lines.span (·.level >= 1)
+  | line :: _ => Id.run do
+    let ⟨_, level, _⟩ := line
+
+    let mut splited := (
+      if level == 0 then
+        lines.span (fun x => x.level == 0)
+      else
+        lines.span (fun x => x.level > 1 || ! x.close)
+    )
+    if level != 0 then
+      splited := listShift splited
     let fstBlock : Block := {
-      content := fst.map (·.content)
+      content := splited.fst
+        |>.map (·.content)
         |>.map (· ++ "\n")
         |>.foldl (· ++ ·) ""
         |>.trim,
-      toCodeBlock := (level₀ == 0)
+      toCodeBlock := (level == 0)
     }
-    fstBlock :: buildBlocks snd
-
-#eval (buildBlocks <| analysis ["/-", "foo", "bar", "-/", "/-", "baz", "-/"]) |>.map (·.content)
+    return fstBlock :: buildBlocks splited.snd
 
 /-- markdown text -/
 abbrev Md := String
@@ -241,7 +256,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   [
     "/-",
     "this is a test",
-    "of multiline block comment -/"
+    "of multiline block comment -/",
   ]
   [
     "this is a test",
@@ -271,6 +286,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   ]
   [
     "hoge",
+    "",
     "fuga"
   ]
 
@@ -288,21 +304,24 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "of nested block comment"
   ]
 
--- #eval runTest
---   (title := "raw code block")
---   [
---     "/-",
---     "```lean",
---     "/- this is test -/",
---     "```",
---     "-/",
---     "/- hoge -/",
---   ]
---   [
---     "```lean",
---     "/- this is test -/",
---     "```",
---     "hoge"
---   ]
+#eval runTest
+  (title := "raw code block")
+  [
+    "/-",
+    "```lean",
+    "/- this is test -/",
+    "```",
+    "fuga",
+    "-/",
+    "/- hoge -/",
+  ]
+  [
+    "```lean",
+    "/- this is test -/",
+    "```",
+    "fuga",
+    "",
+    "hoge"
+  ]
 
 end ConvertToMd
