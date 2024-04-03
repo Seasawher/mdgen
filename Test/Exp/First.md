@@ -39,3 +39,12 @@ example (h : P) : P ∨ Q := by
   apply Or.inl
   exact h
 ```
+
+## nested comment
+Here is a sample of nested block comment:
+/- Hi. I am a nested comment! -/
+
+Here is another example of nested block comment:
+```lean
+/- wao. this is another sample!! -/
+```
