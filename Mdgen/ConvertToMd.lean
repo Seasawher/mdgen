@@ -324,4 +324,19 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "hoge"
   ]
 
+#eval runTest
+  (title := "indent in raw code block")
+  [
+    "/-",
+    "```lean",
+    "  hoge",
+    "```",
+    "-/"
+  ]
+  [
+    "```lean",
+    "  hoge",
+    "```"
+  ]
+
 end ConvertToMd
