@@ -145,19 +145,9 @@ private def Block.toMd (b : Block) : Md :=
       |> String.trim
       |> (· ++ "\n\n")
 
-#eval Block.toMd {
-    content := "/-\nfoo\nbar\n-/\n/-\nbaz\n-/"
-    toCodeBlock := false
-  }
-
 instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
-
-#eval Block.toMd {
-    content := "/-! # This is a test \n/-\nhoge\n-/\n-/",
-    toCodeBlock := false
-  }
 
 private def mergeBlocks (blocks : List Block) : Md :=
   let res := blocks
