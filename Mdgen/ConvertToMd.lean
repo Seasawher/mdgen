@@ -156,7 +156,6 @@ private def mergeBlocks (blocks : List Block) : Md :=
 /-- convert lean contents to markdown contents. -/
 def convertToMd (lines : List String) : Md :=
   let blocks := buildBlocks <| analysis lines
-  dbg_trace s!"blocks: {blocks}"
   mergeBlocks blocks
 
 namespace ConvertToMd
