@@ -49,6 +49,11 @@ Here is a sample of nested block comment:
 
 Here is another example of nested block comment:
 ```lean
+/-! ### sample -/
+
 /- wao. this is another sample!! -/
+
+/-- this is doc comment in comment block -/
+def foo : Nat := 0
 ```
 -/

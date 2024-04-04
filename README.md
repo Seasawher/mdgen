@@ -19,7 +19,7 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * The comments enclosed with an `/-! ... -/` or `/- ... -/` are converted as ground text.
 
-* Nested block comments can also be handled.
+* Nested block comments can also be handled. You can also insert a Lean code block in the block comment.
 
 * The inline comment, doc comment and non-comment parts are converted to lean code blocks.
 
