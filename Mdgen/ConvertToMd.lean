@@ -27,13 +27,17 @@ instance : ToString RichLine where
 def analysis (lines : List String) : List RichLine := Id.run do
   let mut res : List RichLine := []
   let mut level := 0
+  let mut doc := false
   for line in lines do
     if line.endsWith "--#" then
       continue
+    if line.startsWith "/--" then
+      doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
       level := level + 1
-    res := {content := line, level := level, close := line.endsWith "-/"} :: res
+    res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
+      doc := false
       level := level - 1
   return res.reverse
 
@@ -76,7 +80,7 @@ def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") 
     "/-- hoge -/",
     "def hoge := \"hoge\"",
   ]
-  [(0, true), (0, false)]
+  [(0, false), (0, false)]
 
 #eval runTest
   (title := "multi line doc comment")
@@ -85,7 +89,7 @@ def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") 
     "fuga -/",
     "def hoge := 42",
   ]
-  [(0, false), (0, true), (0, false)]
+  [(0, false), (0, false), (0, false)]
 
 end analysis
 
@@ -323,6 +327,23 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   [
     "```lean",
     "  hoge",
+    "```"
+  ]
+
+#eval runTest
+  (title := "doc comment in raw code block")
+  [
+    "/-",
+    "```lean",
+    "/-- foo -/",
+    "def zero := 0",
+    "```",
+    "-/",
+  ]
+  [
+    "```lean",
+    "/-- foo -/",
+    "def zero := 0",
     "```"
   ]
 
