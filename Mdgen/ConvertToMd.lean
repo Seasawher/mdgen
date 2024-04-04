@@ -37,15 +37,16 @@ def analysis (lines : List String) : List RichLine := Id.run do
       level := level + 1
     res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
+      if ! doc then
+        level := level - 1
       doc := false
-      level := level - 1
   return res.reverse
 
 namespace analysis
 
 def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") : IO Unit :=
-  let output := analysis input
-  if output.map (fun x => (x.level, x.close)) = expected then
+  let output := analysis input |>.map (fun x => (x.level, x.close))
+  if output = expected then
     IO.println s!"{title} test passed!"
   else
     throw <| .userError s!"Test failed: \n{output}"
@@ -90,6 +91,18 @@ def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") 
     "def hoge := 42",
   ]
   [(0, false), (0, false), (0, false)]
+
+#eval runTest
+  (title := "raw code block")
+  [
+    "/-",
+      "```lean",
+      "/-- greeting -/",
+      "def foo := \"Hello World!\"",
+      "```",
+    "-/",
+  ]
+  [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
 
 end analysis
 
@@ -345,6 +358,35 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "/-- foo -/",
     "def zero := 0",
     "```"
+  ]
+
+#eval runTest
+  (title := "multiple raw code blocks")
+  [
+    "/-",
+    "```lean",
+    "/-- greeting -/",
+    "def foo := \"Hello World!\"",
+    "```",
+    "",
+    "```lean",
+    "/-! ### second code block -/",
+    "",
+    "def one := 1",
+    "```",
+    "-/",
+  ]
+  [
+    "```lean",
+    "/-- greeting -/",
+    "def foo := \"Hello World!\"",
+    "```",
+    "",
+    "```lean",
+    "/-! ### second code block -/",
+    "",
+    "def one := 1",
+    "```",
   ]
 
 end ConvertToMd
