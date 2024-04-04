@@ -2,7 +2,7 @@
 
 `mdgen` is a tool to generate `.md` files from `.lean` files.
 
-A similar tool, [lean2md](https://github.com/arthurpaulino/lean2md), is already available, but it is written in Python. `mdgen` is written purely in Lean. And mdgen has far more features!
+A similar tool, [lean2md](https://github.com/arthurpaulino/lean2md), is already available, but it is written in Python. `mdgen` is written purely in Lean. And mdgen has more features!
 
 ## How to use
 
@@ -21,7 +21,7 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * The comments enclosed with an `/-! ... -/` or `/- ... -/` are converted as ground text.
 
-* Nested block comments can also be handled. You can also insert a Lean code block in the block comment.
+* Nested block comments can also be handled. You can also insert a code block in the block comment.
 
 * The inline comment, doc comment and non-comment parts are converted to lean code blocks.
 
