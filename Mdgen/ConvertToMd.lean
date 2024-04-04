@@ -55,15 +55,14 @@ def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") 
   (title := "nested block comment")
   [
     "/-",
-      "/- hoge",
-      "-/",
-      "/-",
-      "-/",
+      "/- inline -/",
+      "/- multi",
+      "line -/",
       "hoge",
     "-/",
     "foo"
   ]
-  [(1, false), (2, false), (2, true), (2, false), (2, true), (1, false), (1, true), (0, false)]
+  [(1, false), (2, true), (2, false), (2, true), (1, false), (1, true), (0, false)]
 
 #eval runTest
   (title := "sectioning comment and nested block comment")
