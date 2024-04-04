@@ -266,7 +266,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   ]
 
 #eval runTest
-  (title := "block comment repeated")
+  (title := " consecutive single-line block comments.")
   [
     "/- hoge -/",
     "/- fuga -/",
