@@ -1,6 +1,8 @@
 # mdgen
 
-`mdgen` is a tool to generate `.md` files from `.lean` files. A similar tool, [lean2md](https://github.com/arthurpaulino/lean2md), is already available, but it is written in Python. `mdgen` is written purely in Lean.
+`mdgen` is a tool to generate `.md` files from `.lean` files.
+
+A similar tool, [lean2md](https://github.com/arthurpaulino/lean2md), is already available, but it is written in Python. `mdgen` is written purely in Lean. And mdgen has far more features!
 
 ## How to use
 
