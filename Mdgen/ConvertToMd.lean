@@ -1,11 +1,5 @@
 open System
 
-/-- new notaion to represent `x := x ++ e`. -/
-syntax ident "++=" term : doElem
-
-macro_rules
-  | `(doElem| $x:ident ++= $e:term) => `(doElem| ($x) := ($x) ++ ($e))
-
 structure RichLine where
   /-- text content -/
   content : String
@@ -126,7 +120,6 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
   | [] => []
   | line :: _ =>
     let ⟨_, level, _⟩ := line
-
     let splited := (
       if level == 0 then
         lines.span (fun x => x.level == 0)
