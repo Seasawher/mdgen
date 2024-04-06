@@ -22,9 +22,17 @@ def analysis (lines : List String) : List RichLine := Id.run do
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
+  let mut ignore := false
   for line in lines do
+    -- ignore pattern
     if line.endsWith "--#" then
       continue
+    if line.endsWith "--#--" then
+      ignore := ! ignore
+      continue
+    if ignore then
+      continue
+
     if line.startsWith "/--" then
       doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
@@ -96,6 +104,17 @@ def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") 
     "-/",
   ]
   [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
+
+#eval runTest
+  (title := "multi line ignoring")
+  [
+    "--#--",
+    "this is ignored",
+    "this is also ignored",
+    "--#--",
+    "hoge",
+  ]
+  [(0, false)]
 
 end analysis
 
