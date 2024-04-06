@@ -27,6 +27,8 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * Lines ending with `--#` are ignored.
 
+* Lines enclosed by `--#--` are ignored.
+
 * Directories within `input_dir` will also be converted.
 
 If you want to know more details, check the test code.

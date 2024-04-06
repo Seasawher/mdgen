@@ -1,11 +1,5 @@
 open System
 
-/-- new notaion to represent `x := x ++ e`. -/
-syntax ident "++=" term : doElem
-
-macro_rules
-  | `(doElem| $x:ident ++= $e:term) => `(doElem| ($x) := ($x) ++ ($e))
-
 structure RichLine where
   /-- text content -/
   content : String
@@ -28,9 +22,17 @@ def analysis (lines : List String) : List RichLine := Id.run do
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
+  let mut ignore := false
   for line in lines do
+    -- ignore pattern
     if line.endsWith "--#" then
       continue
+    if line.endsWith "--#--" then
+      ignore := ! ignore
+      continue
+    if ignore then
+      continue
+
     if line.startsWith "/--" then
       doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
@@ -103,6 +105,17 @@ def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") 
   ]
   [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
 
+#eval runTest
+  (title := "multi line ignoring")
+  [
+    "--#--",
+    "this is ignored",
+    "this is also ignored",
+    "--#--",
+    "hoge",
+  ]
+  [(0, false)]
+
 end analysis
 
 /-- A chunk of grouped code for conversion to markdown. -/
@@ -126,7 +139,6 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
   | [] => []
   | line :: _ =>
     let ⟨_, level, _⟩ := line
-
     let splited := (
       if level == 0 then
         lines.span (fun x => x.level == 0)
