@@ -8,6 +8,12 @@ this is a block comment
 -- ignore these line --#
 import Lean --#
 
+--#--
+def thisIsIgnored : Nat := 0
+
+def thisIsAlsoIgnored : Nat := 0
+--#--
+
 /-! ## module comment
 this is a module comment
 -/
