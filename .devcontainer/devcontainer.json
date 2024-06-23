@@ -9,7 +9,10 @@
 
   "customizations": {
     "vscode" : {
-      "extensions" : [ "leanprover.lean4" ]
+      "extensions" : [
+        "leanprover.lean4",
+        "jeff-hykin.code-eol"
+      ]
     }
   }
 }
