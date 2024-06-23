@@ -111,4 +111,3 @@ private def mergeBlocks (blocks : List Block) : Md :=
 def convertToMd (lines : List String) : Md :=
   let blocks := buildBlocks <| analysis lines
   mergeBlocks blocks
-

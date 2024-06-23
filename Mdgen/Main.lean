@@ -28,7 +28,8 @@ def main (args : List String) : IO UInt32 := do
   let paths ← getLeanFilePaths inputDir
 
   for path in paths do
-    let content ← IO.FS.lines path
+    let mut content ← IO.FS.lines path
+    content := content.map (fun line => line.replace "\r" "")
 
     let outputFilePath := outputFilePath
       inputDir.components
