@@ -8,10 +8,11 @@ package «mdgen» where
     ⟨`relaxedAutoImplicit, false⟩
   ]
 
+@[default_target]
 lean_lib «Mdgen» where
   -- add library configuration options here
+  globs := #[.submodules `Mdgen]
 
-@[default_target]
 lean_exe «mdgen» where
   root := `Mdgen
 
