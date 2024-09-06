@@ -13,6 +13,9 @@ lean_lib «Mdgen» where
   -- add library configuration options here
   globs := #[.submodules `Mdgen]
 
+require Cli from git
+  "https://github.com/leanprover/lean4-cli.git" @ "main"
+
 lean_exe «mdgen» where
   root := `Mdgen
 

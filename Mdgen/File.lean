@@ -23,3 +23,17 @@ def genPath (l : List String) : FilePath :=
     |> List.foldl (· ++ ·) ""
     |> (String.dropRight · 1)
     |> FilePath.mk
+
+partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
+    IO $ Array FilePath := do
+  if ← fp.isDir then
+    (← fp.readDir).foldlM (fun acc dir => getLeanFilePaths dir.path acc) acc
+  else return if fp.extension == some "lean" then acc.push fp else acc
+
+/-- create a file with given path and content. -/
+def createFile (path : FilePath) (content : String) : IO Unit := do
+  match path.parent with
+  | none => IO.FS.writeFile path content
+  | some parent =>
+    IO.FS.createDirAll parent
+    IO.FS.writeFile path content
