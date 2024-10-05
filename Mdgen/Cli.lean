@@ -18,7 +18,7 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
       outputDir.components
       path.components
 
-    createFile (genPath outputFilePath) (convertToMd content.toList)
+    createFile (FilePath.ofComponents outputFilePath) (convertToMd content.toList)
   return 0
 
 def mkMdgenCmd : Cmd := `[Cli|

@@ -8,6 +8,13 @@ def List.diff (as : List String) (bs : List String) : List String :=
   | [], _ => []
   | a :: as, b :: bs => if a == b then List.diff as bs else a :: as
 
+/-- generate a filepath from path components -/
+def FilePath.ofComponents (l : List String) : FilePath :=
+  l |> List.map (· ++ FilePath.pathSeparator.toString)
+    |> List.foldl (· ++ ·) ""
+    |> (String.dropRight · 1)
+    |> FilePath.mk
+
 /-- a function which returns an output file path component
 given components of input and output directories. -/
 def outputFilePath (inputDir : List String) (outputDir : List String)
@@ -16,13 +23,6 @@ def outputFilePath (inputDir : List String) (outputDir : List String)
   outputDir ++ relativePath
     |> List.map (String.replace · ".lean" ".md")
     |> List.filter (· ≠ ".")
-
-/-- generate a filepath from path components -/
-def genPath (l : List String) : FilePath :=
-  l |> List.map (· ++ FilePath.pathSeparator.toString)
-    |> List.foldl (· ++ ·) ""
-    |> (String.dropRight · 1)
-    |> FilePath.mk
 
 /-- Recursively outputs a list of the paths of lean files contained
 in a directory whose path is `fp`. -/
