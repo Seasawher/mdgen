@@ -11,8 +11,7 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let paths ← getLeanFilePaths inputDir
 
   for path in paths do
-    let mut content ← IO.FS.lines path
-    content := content.map (fun line => line.replace "\r" "")
+    let content ← IO.FS.lines path
 
     let outputFilePath := outputFilePath
       inputDir.components
