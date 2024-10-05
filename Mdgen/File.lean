@@ -24,6 +24,8 @@ def genPath (l : List String) : FilePath :=
     |> (String.dropRight · 1)
     |> FilePath.mk
 
+/-- Recursively outputs a list of the paths of lean files contained
+in a directory whose path is `fp`. -/
 partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
     IO $ Array FilePath := do
   if ← fp.isDir then
