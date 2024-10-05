@@ -2,7 +2,7 @@ import Mdgen.File
 import Mdgen.ConvertToMd
 import Cli
 
-open Cli System
+open Cli System FilePath
 
 def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let inputDir : FilePath := p.positionalArg! "input_dir" |>.as! String

@@ -33,7 +33,7 @@ partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
   else return if fp.extension == some "lean" then acc.push fp else acc
 
 /-- create a file with given path and content. -/
-def createFile (path : FilePath) (content : String) : IO Unit := do
+def FilePath.createFile (path : FilePath) (content : String) : IO Unit := do
   match path.parent with
   | none => IO.FS.writeFile path content
   | some parent =>
