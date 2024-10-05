@@ -17,7 +17,7 @@ def FilePath.ofComponents (l : List String) : FilePath :=
 
 /-- a function which returns an output file path component
 given components of input and output directories. -/
-def outputFilePath (inputDir : List String) (outputDir : List String)
+def FilePath.outputFilePath (inputDir : List String) (outputDir : List String)
     (path : List String) : List String :=
   let relativePath := path.diff inputDir
   outputDir ++ relativePath
@@ -26,7 +26,7 @@ def outputFilePath (inputDir : List String) (outputDir : List String)
 
 /-- Recursively outputs a list of the paths of lean files contained
 in a directory whose path is `fp`. -/
-partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
+partial def FilePath.getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
     IO $ Array FilePath := do
   if ← fp.isDir then
     (← fp.readDir).foldlM (fun acc dir => getLeanFilePaths dir.path acc) acc

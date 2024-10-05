@@ -1,5 +1,7 @@
 import Mdgen.File
 
+open FilePath
+
 #guard List.diff ["test", "src", "first"] ["test", "src"] = ["first"]
 
 #guard List.diff ["test", "src", "first"] ["test", "out"] = ["src", "first"]
