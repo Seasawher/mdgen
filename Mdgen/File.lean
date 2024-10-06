@@ -50,8 +50,4 @@ def relativePath (childFile parentDir : FilePath) : List String :=
   childComponents.diff parentComponents
     |>.map (fun _ => "..")
 
-#eval relativePath
-  (childFile := ofComponents ["out", "a"])
-  (parentDir := ofComponents ["out"])
-
 end System.FilePath

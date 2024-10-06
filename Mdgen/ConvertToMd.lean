@@ -118,10 +118,10 @@ def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block 
 
   let pathPrefix := relativePath outputFilePath outputDir
     |>.drop 1
-    |>.intersperse "/"
+    |>.map (· ++ "/")
     |>.foldl (· ++ ·) ""
   let newContent := b.content
-    |>.replace "#{root}" pathPrefix
+    |>.replace "#{root}/" pathPrefix
   return {b with content := newContent}
 
 /-- convert lean contents to markdown contents. -/
