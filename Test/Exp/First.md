@@ -53,3 +53,9 @@ Here is another example of nested block comment:
 /-- this is doc comment in comment block -/
 def foo : Nat := 0
 ```
+
+## Uniform Internal Link Syntax
+
+* [link to Second.md](Second/Second.md)
+* [link to Third.md](Third/Third/Third.md)
+* [link to Fourth.md](Fourth.md)

@@ -31,6 +31,8 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * Directories within `input_dir` will also be converted.
 
+* Uniform internal link syntax is supported. You can write the path from the `output_dir` with the symbol `#{root}` in a markdown part. mdgen will automatically insert the required number of `../`. Thus links to the same file can be written in the same way regardless of where they are referenced from.
+
 If you want to know more details, check the test code.
 
 * [source](./Test/Src/First.lean)

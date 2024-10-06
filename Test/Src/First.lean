@@ -63,3 +63,10 @@ Here is another example of nested block comment:
 def foo : Nat := 0
 ```
 -/
+
+/- ## Uniform Internal Link Syntax
+
+* [link to Second.md](#{root}/Second/Second.md)
+* [link to Third.md](#{root}/Third/Third/Third.md)
+* [link to Fourth.md](#{root}/Fourth.md)
+-/

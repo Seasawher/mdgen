@@ -2,7 +2,7 @@ import Mdgen.File
 import Mdgen.ConvertToMd
 import Cli
 
-open Cli System
+open Cli System FilePath
 
 def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let inputDir : FilePath := p.positionalArg! "input_dir" |>.as! String
@@ -11,15 +11,15 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let paths ← getLeanFilePaths inputDir
 
   for path in paths do
-    let mut content ← IO.FS.lines path
-    content := content.map (fun line => line.replace "\r" "")
+    let content ← IO.FS.lines path
 
     let outputFilePath := outputFilePath
       inputDir.components
       outputDir.components
       path.components
 
-    createFile (genPath outputFilePath) (convertToMd content.toList)
+    let newContent := convertToMd (some outputFilePath) (some outputDir) content.toList
+    createFile (path := outputFilePath) (content := newContent)
   return 0
 
 def mkMdgenCmd : Cmd := `[Cli|

@@ -1,4 +1,6 @@
-open System
+import Mdgen.File
+
+open System FilePath
 
 structure RichLine where
   /-- text content -/
@@ -54,8 +56,10 @@ instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
-def listShift {α : Type} (x : List α × List α) : List α × List α :=
-  let ⟨l, r⟩ := x
+/-- a variant of `List.span` which return a list including
+at most one "edge" element -/
+def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × List α :=
+  let ⟨l, r⟩ := as.span p
   match r with
   | [] => (l, [])
   | y :: ys => (l ++ [y], ys)
@@ -69,7 +73,7 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
       if level == 0 then
         lines.span (fun x => x.level == 0)
       else
-        listShift <| lines.span (fun x => x.level > 1 || ! x.close)
+        lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
     )
     let fstBlock : Block := {
       content := splited.fst
@@ -84,7 +88,7 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
 /-- markdown text -/
 abbrev Md := String
 
-private def Block.toMd (b : Block) : Md :=
+def Block.toMd (b : Block) : Md :=
   if b.content == "" then
     ""
   else if b.toCodeBlock then
@@ -101,13 +105,33 @@ instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
-private def mergeBlocks (blocks : List Block) : Md :=
+def mergeBlocks (blocks : List Block) : Md :=
   let res := blocks
     |>.map Block.toMd
     |>.foldl (· ++ ·) ""
   res.trim ++ "\n"
 
+/-- convert `#{root}` in internal link to repeated `../` string -/
+def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
+  if b.toCodeBlock then
+    return b
+
+  let pathPrefix := relativePath outputFilePath outputDir
+    |>.drop 1
+    |>.map (· ++ "/")
+    |>.foldl (· ++ ·) ""
+  let newContent := b.content
+    |>.replace "#{root}/" pathPrefix
+  return {b with content := newContent}
+
 /-- convert lean contents to markdown contents. -/
-def convertToMd (lines : List String) : Md :=
+def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : List String) : Md :=
   let blocks := buildBlocks <| analysis lines
-  mergeBlocks blocks
+
+  let postProcessedBlocks :=
+    match outputFilePath, outputDir with
+    | some outputFilePath, some outputDir =>
+      blocks.map (Block.postProcess outputFilePath outputDir)
+    | _, _ => blocks
+
+  mergeBlocks postProcessedBlocks

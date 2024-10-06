@@ -81,7 +81,7 @@ def _root_.List.withBreakLine (as : List String) : String :=
   as.map (· ++ "\n") |>.foldl (· ++ ·) ""
 
 def runTest (input : List String) (expected : List String) (title := "") : IO Unit :=
-  let output := convertToMd input
+  let output := convertToMd (lines := input)
   if output = expected.withBreakLine then
     IO.println s!"{title} test passed!"
   else
