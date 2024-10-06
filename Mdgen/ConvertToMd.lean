@@ -109,12 +109,7 @@ def mergeBlocks (blocks : List Block) : Md :=
     |>.foldl (· ++ ·) ""
   res.trim ++ "\n"
 
-/-- convert lean contents to markdown contents. -/
-def convertToMd (lines : List String) : Md :=
-  let blocks := buildBlocks <| analysis lines
-  mergeBlocks blocks
-
-/-- convert `#{root}` -/
+/-- convert `#{root}` in internal link to repeated `../` string -/
 def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
   if b.toCodeBlock then
     return b
@@ -127,9 +122,14 @@ def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block 
     |>.replace "#{root}" pathPrefix
   return {b with content := newContent}
 
-/-- convert lean contents to markdown contents with postprocessing -/
-def convertToMd' (outputFilePath outputDir : FilePath) (lines : List String) : Md :=
+/-- convert lean contents to markdown contents. -/
+def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : List String) : Md :=
   let blocks := buildBlocks <| analysis lines
-  let postProcessedBlocks := blocks
-    |>.map (Block.postProcess outputFilePath outputDir)
+
+  let postProcessedBlocks :=
+    match outputFilePath, outputDir with
+    | some outputFilePath, some outputDir =>
+      blocks.map (Block.postProcess outputFilePath outputDir)
+    | _, _ => blocks
+
   mergeBlocks postProcessedBlocks
