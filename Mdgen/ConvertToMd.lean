@@ -1,4 +1,6 @@
-open System
+import Mdgen.File
+
+open System FilePath
 
 structure RichLine where
   /-- text content -/
@@ -84,7 +86,7 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
 /-- markdown text -/
 abbrev Md := String
 
-private def Block.toMd (b : Block) : Md :=
+def Block.toMd (b : Block) : Md :=
   if b.content == "" then
     ""
   else if b.toCodeBlock then
@@ -101,7 +103,7 @@ instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
-private def mergeBlocks (blocks : List Block) : Md :=
+def mergeBlocks (blocks : List Block) : Md :=
   let res := blocks
     |>.map Block.toMd
     |>.foldl (· ++ ·) ""
@@ -111,3 +113,23 @@ private def mergeBlocks (blocks : List Block) : Md :=
 def convertToMd (lines : List String) : Md :=
   let blocks := buildBlocks <| analysis lines
   mergeBlocks blocks
+
+/-- convert `#{root}` -/
+def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
+  if b.toCodeBlock then
+    return b
+
+  let pathPrefix := relativePath outputFilePath outputDir
+    |>.drop 1
+    |>.intersperse "/"
+    |>.foldl (· ++ ·) ""
+  let newContent := b.content
+    |>.replace "#{root}" pathPrefix
+  return {b with content := newContent}
+
+/-- convert lean contents to markdown contents with postprocessing -/
+def convertToMd' (outputFilePath outputDir : FilePath) (lines : List String) : Md :=
+  let blocks := buildBlocks <| analysis lines
+  let postProcessedBlocks := blocks
+    |>.map (Block.postProcess outputFilePath outputDir)
+  mergeBlocks postProcessedBlocks
