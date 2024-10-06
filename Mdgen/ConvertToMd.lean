@@ -56,8 +56,10 @@ instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
-def listShift {α : Type} (x : List α × List α) : List α × List α :=
-  let ⟨l, r⟩ := x
+/-- a variant of `List.span` which return a list including
+at most one "edge" element -/
+def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × List α :=
+  let ⟨l, r⟩ := as.span p
   match r with
   | [] => (l, [])
   | y :: ys => (l ++ [y], ys)
@@ -71,7 +73,7 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
       if level == 0 then
         lines.span (fun x => x.level == 0)
       else
-        listShift <| lines.span (fun x => x.level > 1 || ! x.close)
+        lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
     )
     let fstBlock : Block := {
       content := splited.fst
