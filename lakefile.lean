@@ -9,7 +9,8 @@ package «mdgen» where
   -- add package configuration options here
   leanOptions := #[
     ⟨`autoImplicit, false⟩,
-    ⟨`relaxedAutoImplicit, false⟩
+    ⟨`relaxedAutoImplicit, false⟩,
+    ⟨`linter.missingDocs, true⟩
   ]
 
 @[default_target]

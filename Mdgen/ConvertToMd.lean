@@ -2,6 +2,7 @@ import Mdgen.File
 
 open System FilePath
 
+/-- intermediate data structure -/
 structure RichLine where
   /-- text content -/
   content : String
@@ -48,7 +49,10 @@ def analysis (lines : List String) : List RichLine := Id.run do
 
 /-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
+  /-- content of block -/
   content : String
+
+  /-- whether the `content` is converted into code section in markdown -/
   toCodeBlock : Bool
   deriving Repr
 
@@ -64,6 +68,7 @@ def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × 
   | [] => (l, [])
   | y :: ys => (l ++ [y], ys)
 
+/-- build a `Block` from a `RichLine` -/
 partial def buildBlocks (lines : List RichLine) : List Block :=
   match lines with
   | [] => []
@@ -88,6 +93,7 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
 /-- markdown text -/
 abbrev Md := String
 
+/-- convert a `Block` intro a markdown snippet -/
 def Block.toMd (b : Block) : Md :=
   if b.content == "" then
     ""
@@ -105,6 +111,7 @@ instance : ToString Block where
   toString := fun b =>
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
+/-- merge blocks and build a markdown content -/
 def mergeBlocks (blocks : List Block) : Md :=
   let res := blocks
     |>.map Block.toMd

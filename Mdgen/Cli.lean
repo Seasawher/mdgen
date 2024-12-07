@@ -4,6 +4,7 @@ import Cli
 
 open Cli System FilePath
 
+/-- what `mdgen` does -/
 def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let inputDir : FilePath := p.positionalArg! "input_dir" |>.as! String
   let outputDir : FilePath := p.positionalArg! "output_dir" |>.as! String
@@ -22,6 +23,7 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
     createFile (path := outputFilePath) (content := newContent)
   return 0
 
+/-- API definition of `mdgen` command -/
 def mkMdgenCmd : Cmd := `[Cli|
   mdgen VIA runMdgenCmd; ["1.5.0"]
   "mdgen is a tool to generate .md files from .lean files."

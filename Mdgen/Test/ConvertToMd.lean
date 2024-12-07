@@ -2,6 +2,7 @@ import Mdgen.ConvertToMd
 
 namespace analysis
 
+/-- test for `analysis` function -/
 def runTest (input : List String) (expected : List (Nat × Bool)) (title := "") : IO Unit :=
   let output := analysis input |>.map (fun x => (x.level, x.close))
   if output = expected then
@@ -77,9 +78,11 @@ end analysis
 
 namespace ConvertToMd
 
+/-- add breakline for each element in a list -/
 def _root_.List.withBreakLine (as : List String) : String :=
   as.map (· ++ "\n") |>.foldl (· ++ ·) ""
 
+/-- test for `convertToMd` -/
 def runTest (input : List String) (expected : List String) (title := "") : IO Unit :=
   let output := convertToMd (lines := input)
   if output = expected.withBreakLine then
