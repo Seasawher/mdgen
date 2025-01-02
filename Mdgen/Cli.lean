@@ -11,6 +11,14 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
   let paths ← getLeanFilePaths inputDir
 
+  if p.hasFlag "count" then
+    let mut globalCount := 0
+    for path in paths do
+      let content ← IO.FS.lines path
+      let count := content.foldl (fun acc str => acc + str.length) 0
+      globalCount := globalCount + count
+    IO.println s!"The input Lean files contain a total of {globalCount} characters."
+
   for path in paths do
     let content ← IO.FS.lines path
 
@@ -25,8 +33,11 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
 /-- API definition of `mdgen` command -/
 def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; ["1.5.0"]
+  mdgen VIA runMdgenCmd; ["1.6.0"]
   "mdgen is a tool to generate .md files from .lean files."
+
+  FLAGS:
+    c, count; "Counts the total number of characters in the input files. However, please be aware that the output may not be entirely accurate."
 
   ARGS:
     input_dir : String; "The directory containing the input Lean files."
