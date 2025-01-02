@@ -24,18 +24,22 @@ require Cli from git
 lean_exe «mdgen» where
   root := `Mdgen
 
-def runCmd (cmd : String) (args : Array String) : ScriptM Bool := do
+def runCmd (input : String) : IO Unit := do
+  let cmdList := input.splitOn " "
+  let cmd := cmdList.head!
+  let args := cmdList.tail |>.toArray
   let out ← IO.Process.output {
     cmd := cmd
     args := args
   }
-  let hasError := out.exitCode != 0
-  if hasError then
-    IO.eprint out.stderr
-  return hasError
+  if out.exitCode != 0 then
+    IO.eprintln out.stderr
+    throw <| IO.userError s!"Failed to execute: {input}"
+  else if !out.stdout.isEmpty then
+    IO.println out.stdout
 
 /-- run test by `lake test` -/
 @[test_driver] script test do
-  if ← runCmd "lake" #["exe", "mdgen", "Test/Src", "Test/Out"] then return 1
-  if ← runCmd "lean" #["--run", "Test.lean"] then return 1
+  runCmd "lake exe mdgen Test/Src Test/Out"
+  runCmd "lean --run Test.lean"
   return 0
