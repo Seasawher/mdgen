@@ -38,6 +38,10 @@ If you want to know more details, check the test code.
 * [source](./Test/Src/First.lean)
 * [expected output](./Test/Exp/First.md)
 
+## CLI options
+
+* `-c`, `--count`: Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate.
+
 ## Acknowledgments
 
 I would like to acknowledge the author of [lean2md](https://github.com/arthurpaulino/lean2md), [@arthurpaulino](https://github.com/arthurpaulino).
