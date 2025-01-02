@@ -3,6 +3,5 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "editor.tabSize": 2,
-  "code-eol.validLineEnding": "LF",
-  "code-eol.newlineCharacter":"",
+  "workbench.colorTheme": "Aura Dark",
 }
