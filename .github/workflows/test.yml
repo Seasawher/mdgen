@@ -21,4 +21,4 @@ jobs:
       - name: lean action
         uses: leanprover/lean-action@v1
         with:
-          build-args: "--fail-level=warning"
+          build-args: "--fail-level=warning --log-level=warning"

@@ -49,6 +49,12 @@ example (h : P) : P ∨ Q := by
   apply Or.inl
   exact h
 
+/-- doc comment
+
+/- test of block comment in doc -/
+-/
+macro "foo" : term => `(0)
+
 /- ## nested comment
 Here is a sample of nested block comment:
 /- Hi. I am a nested comment! -/
