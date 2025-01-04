@@ -43,7 +43,7 @@ def analysis (lines : List String) : List RichLine := Id.run do
   for line in (filterIgnored lines) do
     if line.startsWith "/--" then
       doc := true
-    if line.startsWith "/-" && ! line.startsWith "/--" then
+    if line.startsWith "/-" && ! line.startsWith "/--" && ! doc then
       level := level + 1
     res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
