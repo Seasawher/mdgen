@@ -12,10 +12,25 @@ structure RichLine where
 
   /-- whether the line ends with the closing symbol or not. -/
   close : Bool
-  deriving Repr, BEq, Inhabited
+deriving Repr, BEq, Inhabited
 
 instance : ToString RichLine where
-  toString := fun l => l.content
+  toString := RichLine.content
+
+/-- handle ignore pattern -/
+def filterIgnored (lines : List String) : List String := Id.run do
+  let mut res := []
+  let mut ignore := false
+  for line in lines do
+    if line.endsWith "--#" then
+      continue
+    if line.endsWith "--#--" then
+      ignore := ! ignore
+      continue
+    if ignore then
+      continue
+    res := line :: res
+  return res.reverse
 
 /-- Receive a list of codes and count the nesting of block and sectioning comments.
 * The corresponding opening and closing brackets should have the same level.
@@ -25,17 +40,7 @@ def analysis (lines : List String) : List RichLine := Id.run do
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
-  let mut ignore := false
-  for line in lines do
-    -- ignore pattern
-    if line.endsWith "--#" then
-      continue
-    if line.endsWith "--#--" then
-      ignore := ! ignore
-      continue
-    if ignore then
-      continue
-
+  for line in (filterIgnored lines) do
     if line.startsWith "/--" then
       doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
