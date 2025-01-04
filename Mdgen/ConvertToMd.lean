@@ -177,6 +177,36 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   ]
 
 #eval runTest
+  (title := "block comment in doc comment")
+  [
+    "/-- foo",
+    "bar /- hoge -/",
+    "baz -/",
+  ]
+  [
+    "```lean",
+    "/-- foo",
+    "bar /- hoge -/",
+    "baz -/",
+    "```"
+  ]
+
+#eval runTest
+  (title := "leading block comment in doc comment")
+  [
+    "/-- foo",
+    "/- hoge bar -/",
+    "baz -/",
+  ]
+  [
+    "```lean",
+    "/-- foo",
+    "/- hoge bar -/",
+    "baz -/",
+    "```"
+  ]
+
+#eval runTest
   (title := "block comment")
   ["/- this is a test -/"]
   ["this is a test"]
@@ -209,7 +239,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   ]
 
 #eval runTest
-  (title := " consecutive single-line block comments.")
+  (title := "consecutive single-line block comments.")
   [
     "/- hoge -/",
     "/- fuga -/",
