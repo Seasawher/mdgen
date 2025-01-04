@@ -40,16 +40,22 @@ def analysis (lines : List String) : List RichLine := Id.run do
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
+  let mut blockCommentInDoc := false
   for line in (filterIgnored lines) do
     if line.startsWith "/--" then
       doc := true
-    if line.startsWith "/-" && ! line.startsWith "/--" && ! doc then
-      level := level + 1
+    if line.startsWith "/-" && ! line.startsWith "/--" then
+      if ! doc then
+        level := level + 1
+      else
+        blockCommentInDoc := true
     res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
       if ! doc then
         level := level - 1
-      doc := false
+      if ! blockCommentInDoc then
+        doc := false
+      blockCommentInDoc := false
   return res.reverse
 
 namespace Analysis

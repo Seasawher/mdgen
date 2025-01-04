@@ -111,7 +111,7 @@ set_option linter.unusedVariables false in
 def runTest (input : List String) (expected : List String) (title := "") : IO Unit := do
   let output := convertToMd (lines := input)
   if output ≠ expected.withBreakLine then
-    throw <| .userError s!"Test failed: \n{output}"
+    throw <| .userError s!"test for \"{title}\" failed: \n{output}"
 
 #eval runTest
   (title := "inline comment")
@@ -202,6 +202,23 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "```lean",
     "/-- foo",
     "/- hoge bar -/",
+    "baz -/",
+    "```"
+  ]
+
+#eval runTest
+  (title := "multiple leading block comments in doc comment")
+  [
+    "/-- foo",
+    "/- hoge bar -/",
+    "/- fuga -/ baz",
+    "baz -/",
+  ]
+  [
+    "```lean",
+    "/-- foo",
+    "/- hoge bar -/",
+    "/- fuga -/ baz",
     "baz -/",
     "```"
   ]
