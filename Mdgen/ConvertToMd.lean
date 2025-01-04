@@ -1,51 +1,4 @@
-import Mdgen.File
-
-open System FilePath
-
-/-- intermediate data structure -/
-structure RichLine where
-  /-- text content -/
-  content : String
-
-  /-- nest level -/
-  level : Nat
-
-  /-- whether the line ends with the closing symbol or not. -/
-  close : Bool
-  deriving Repr, BEq, Inhabited
-
-instance : ToString RichLine where
-  toString := fun l => l.content
-
-/-- Receive a list of codes and count the nesting of block and sectioning comments.
-* The corresponding opening and closing brackets should have the same level.
-* Also handles the exclusion of ignored targets.
--/
-def analysis (lines : List String) : List RichLine := Id.run do
-  let mut res : List RichLine := []
-  let mut level := 0
-  let mut doc := false
-  let mut ignore := false
-  for line in lines do
-    -- ignore pattern
-    if line.endsWith "--#" then
-      continue
-    if line.endsWith "--#--" then
-      ignore := ! ignore
-      continue
-    if ignore then
-      continue
-
-    if line.startsWith "/--" then
-      doc := true
-    if line.startsWith "/-" && ! line.startsWith "/--" then
-      level := level + 1
-    res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
-    if line.endsWith "-/" then
-      if ! doc then
-        level := level - 1
-      doc := false
-  return res.reverse
+import Mdgen.Analysis
 
 /-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
@@ -118,7 +71,10 @@ def mergeBlocks (blocks : List Block) : Md :=
     |>.foldl (· ++ ·) ""
   res.trim ++ "\n"
 
-/-- convert `#{root}` in internal link to repeated `../` string -/
+open System FilePath
+
+/-- Handle uniform internal link syntax.
+This converts `#{root}` in internal link to repeated `../` string -/
 def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
   if b.toCodeBlock then
     return b
@@ -142,3 +98,221 @@ def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Li
     | _, _ => blocks
 
   mergeBlocks postProcessedBlocks
+
+namespace ConvertToMd
+
+/-- add breakline for each element in a list -/
+def _root_.List.withBreakLine (as : List String) : String :=
+  as.map (· ++ "\n") |>.foldl (· ++ ·) ""
+
+set_option linter.unusedVariables false in
+
+/-- test for `convertToMd` -/
+def runTest (input : List String) (expected : List String) (title := "") : IO Unit := do
+  let output := convertToMd (lines := input)
+  if output ≠ expected.withBreakLine then
+    throw <| .userError s!"Test failed: \n{output}"
+
+#eval runTest
+  (title := "inline comment")
+  ["-- this is a test"]
+  [
+    "```lean",
+    "-- this is a test",
+    "```"
+  ]
+
+#eval runTest
+  (title := "module document")
+  ["/-! # This is a test -/"]
+  ["# This is a test"]
+
+#eval runTest
+  (title := "multi line sectioning comment")
+  [
+    "/-! # This is a test",
+    "of multiline section comment -/"
+  ]
+  [
+    "# This is a test",
+    "of multiline section comment"
+  ]
+
+#eval runTest
+  (title := "empty lines")
+  ["/-! test -/", "", "", ""]
+  ["test"]
+
+#eval runTest
+  (title := "ignored lines")
+  ["this is ignored --#", "this is also ignored --#"]
+  [""]
+
+#eval runTest
+  (title := "doc comment")
+  [
+    "/-- This is a test -/",
+    "def foo := 0"
+  ]
+  [
+    "```lean",
+    "/-- This is a test -/",
+    "def foo := 0",
+    "```"
+  ]
+
+#eval runTest
+  (title := "multi line doc comment")
+  [
+    "/-- This is a test",
+    "of multiline doc comment -/",
+    "def foo := 0"
+  ]
+  [
+    "```lean",
+    "/-- This is a test",
+    "of multiline doc comment -/",
+    "def foo := 0",
+    "```"
+  ]
+
+#eval runTest
+  (title := "block comment")
+  ["/- this is a test -/"]
+  ["this is a test"]
+
+#eval runTest
+  (title := "multi line block comment")
+  [
+    "/-",
+    "this is a test",
+    "of multiline block comment -/",
+  ]
+  [
+    "this is a test",
+    "of multiline block comment"
+  ]
+
+#eval runTest
+  (title := "respect indent")
+  [
+    "hoge",
+    "  fuga",
+    "  monyo",
+  ]
+  [
+    "```lean",
+    "hoge",
+    "  fuga",
+    "  monyo",
+    "```"
+  ]
+
+#eval runTest
+  (title := " consecutive single-line block comments.")
+  [
+    "/- hoge -/",
+    "/- fuga -/",
+  ]
+  [
+    "hoge",
+    "",
+    "fuga"
+  ]
+
+#eval runTest
+  (title := "nested block comment")
+  [
+    "/-",
+    "this is a test",
+    "/- nested comment -/",
+    "of nested block comment -/"
+  ]
+  [
+    "this is a test",
+    "/- nested comment -/",
+    "of nested block comment"
+  ]
+
+#eval runTest
+  (title := "raw code block")
+  [
+    "/-",
+    "```lean",
+    "/- this is test -/",
+    "```",
+    "fuga",
+    "-/",
+    "/- hoge -/",
+  ]
+  [
+    "```lean",
+    "/- this is test -/",
+    "```",
+    "fuga",
+    "",
+    "hoge"
+  ]
+
+#eval runTest
+  (title := "indent in raw code block")
+  [
+    "/-",
+    "```lean",
+    "  hoge",
+    "```",
+    "-/"
+  ]
+  [
+    "```lean",
+    "  hoge",
+    "```"
+  ]
+
+#eval runTest
+  (title := "doc comment in raw code block")
+  [
+    "/-",
+    "```lean",
+    "/-- foo -/",
+    "def zero := 0",
+    "```",
+    "-/",
+  ]
+  [
+    "```lean",
+    "/-- foo -/",
+    "def zero := 0",
+    "```"
+  ]
+
+#eval runTest
+  (title := "multiple raw code blocks")
+  [
+    "/-",
+    "```lean",
+    "/-- greeting -/",
+    "def foo := \"Hello World!\"",
+    "```",
+    "",
+    "```lean",
+    "/-! ### second code block -/",
+    "",
+    "def one := 1",
+    "```",
+    "-/",
+  ]
+  [
+    "```lean",
+    "/-- greeting -/",
+    "def foo := \"Hello World!\"",
+    "```",
+    "",
+    "```lean",
+    "/-! ### second code block -/",
+    "",
+    "def one := 1",
+    "```",
+  ]
+
+end ConvertToMd
