@@ -32,16 +32,37 @@ def filterIgnored (lines : Array String) : Array String := Id.run do
     res := res.push line
   return res
 
-/-- Receive a list of codes and count the nesting of block and sectioning comments.
+/-- preprocess for converting doc comment to block comment -/
+private def preprocess (lines : Array String) : Array Nat × Array String := Id.run do
+  let token := "/-▬-//--"
+  let filtered : Array (Option Nat × String) :=
+    lines.mapIdx (fun idx line =>
+      if line.startsWith token then
+        (some idx, line.replace token "/--")
+      else
+        (none, line)
+  )
+  let indexes := filtered.filterMap (·.fst)
+  let contents := filtered.map (·.snd)
+  return (indexes, contents)
+
+/-- postprocess for converting doc comment to block comment -/
+private def postprocess (indexes : Array Nat) (i : Nat) (line : String) : String :=
+  if indexes.contains i then
+    "/-" ++ line.drop "/--".length
+  else
+    line
+
+/-- Receive a array of codes and count the nesting of block and sectioning comments.
 The corresponding opening and closing brackets should have the same level.
 -/
 def analyze (lines : Array String) : List RichLine := Id.run do
-  let lines := filterIgnored lines
+  let (indexes, lines) := preprocess <| filterIgnored lines
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
   let mut blockCommentInDoc := false
-  for line in lines do
+  for (line, i) in lines.zipIdx do
     if line.startsWith "/--" then
       doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
@@ -49,7 +70,8 @@ def analyze (lines : Array String) : List RichLine := Id.run do
         level := level + 1
       else
         blockCommentInDoc := true
-    res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
+    let newLine := postprocess indexes i line
+    res := {content := newLine, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
       if ! doc then
         level := level - 1
