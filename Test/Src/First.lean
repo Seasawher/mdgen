@@ -64,6 +64,15 @@ inductive MyNat where
 #guard_msgs in --#
 #check MyNat.zero
 
+namespace MyNat
+  /- ## indent block -/
+
+  /-⋆-//-- info: zero.succ : MyNat -/
+  #guard_msgs in --#
+  #check MyNat.succ MyNat.zero
+
+end MyNat
+
 /- ## nested comment
 Here is a sample of nested block comment:
 /- Hi. I am a nested comment! -/

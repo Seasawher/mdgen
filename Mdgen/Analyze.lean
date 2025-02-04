@@ -37,7 +37,7 @@ private def preprocess (lines : Array String) : Array Nat × Array String := Id.
   let token := "/-⋆-//--"
   let filtered : Array (Option Nat × String) :=
     lines.mapIdx (fun idx line =>
-      if line.startsWith token then
+      if line.trimLeft.startsWith token then
         (some idx, line.replace token "/--")
       else
         (none, line)
@@ -49,7 +49,7 @@ private def preprocess (lines : Array String) : Array Nat × Array String := Id.
 /-- postprocess for converting doc comment to block comment -/
 private def postprocess (indexes : Array Nat) (i : Nat) (line : String) : String :=
   if indexes.contains i then
-    "/-" ++ line.drop "/--".length
+    line.replace "/--" "/-"
   else
     line
 

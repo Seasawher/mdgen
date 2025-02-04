@@ -52,6 +52,14 @@ inductive MyNat where
 -- Here is a sample of converting doc comment to block comment
 /- info: MyNat.zero : MyNat -/
 #check MyNat.zero
+
+namespace MyNat
+  /- ## indent block -/
+
+  /- info: zero.succ : MyNat -/
+  #check MyNat.succ MyNat.zero
+
+end MyNat
 ```
 
 ## nested comment

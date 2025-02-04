@@ -235,6 +235,23 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
   ]
 
 #eval runTest
+  (title := "convert doc comment syntax - indent")
+  [
+    "namespace Foo",
+    "  /-⋆-//-- doc comment -/",
+    "  def zero := 0",
+    "end Foo",
+  ]
+  [
+    "```lean",
+    "namespace Foo",
+    "  /- doc comment -/",
+    "  def zero := 0",
+    "end Foo",
+    "```"
+  ]
+
+#eval runTest
   (title := "multiple leading block comments in doc comment")
   [
     "/-- foo",
