@@ -55,6 +55,15 @@ example (h : P) : P ∨ Q := by
 -/
 macro "foo" : term => `(0)
 
+inductive MyNat where
+  | zero
+  | succ (n : MyNat)
+
+-- Here is a sample of converting doc comment to block comment
+/-⋆-//-- info: MyNat.zero : MyNat -/
+#guard_msgs in --#
+#check MyNat.zero
+
 /- ## nested comment
 Here is a sample of nested block comment:
 /- Hi. I am a nested comment! -/

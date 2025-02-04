@@ -18,8 +18,8 @@ instance : ToString RichLine where
   toString := RichLine.content
 
 /-- handle ignore pattern -/
-def filterIgnored (lines : List String) : List String := Id.run do
-  let mut res := []
+def filterIgnored (lines : Array String) : Array String := Id.run do
+  let mut res := #[]
   let mut ignore := false
   for line in lines do
     if line.endsWith "--#" then
@@ -29,19 +29,40 @@ def filterIgnored (lines : List String) : List String := Id.run do
       continue
     if ignore then
       continue
-    res := line :: res
-  return res.reverse
+    res := res.push line
+  return res
 
-/-- Receive a list of codes and count the nesting of block and sectioning comments.
+/-- preprocess for converting doc comment to block comment -/
+private def preprocess (lines : Array String) : Array Nat × Array String := Id.run do
+  let token := "/-⋆-//--"
+  let filtered : Array (Option Nat × String) :=
+    lines.mapIdx (fun idx line =>
+      if line.startsWith token then
+        (some idx, line.replace token "/--")
+      else
+        (none, line)
+  )
+  let indexes := filtered.filterMap (·.fst)
+  let contents := filtered.map (·.snd)
+  return (indexes, contents)
+
+/-- postprocess for converting doc comment to block comment -/
+private def postprocess (indexes : Array Nat) (i : Nat) (line : String) : String :=
+  if indexes.contains i then
+    "/-" ++ line.drop "/--".length
+  else
+    line
+
+/-- Receive a array of codes and count the nesting of block and sectioning comments.
 The corresponding opening and closing brackets should have the same level.
 -/
-def analyze (lines : List String) : List RichLine := Id.run do
-  let lines := filterIgnored lines
+def analyze (lines : Array String) : List RichLine := Id.run do
+  let (indexes, lines) := preprocess <| filterIgnored lines
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
   let mut blockCommentInDoc := false
-  for line in lines do
+  for (line, i) in lines.zipIdx do
     if line.startsWith "/--" then
       doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
@@ -49,7 +70,8 @@ def analyze (lines : List String) : List RichLine := Id.run do
         level := level + 1
       else
         blockCommentInDoc := true
-    res := {content := line, level := level, close := line.endsWith "-/" && ! doc} :: res
+    let newLine := postprocess indexes i line
+    res := {content := newLine, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
       if ! doc then
         level := level - 1
@@ -63,14 +85,14 @@ namespace Analyze
 set_option linter.unusedVariables false in
 
 /-- test for `analyze` function -/
-def runTest (title := "") (input : List String) (expected : List (Nat × Bool))  : IO Unit := do
+def runTest (title := "") (input : Array String) (expected : List (Nat × Bool))  : IO Unit := do
   let output := analyze input |>.map (fun x => (x.level, x.close))
   if output ≠ expected then
     throw <| .userError s!"Test failed: \n{output}"
 
 #eval runTest
   (title := "nested block comment")
-  [
+  #[
     "/-",
       "/- inline -/",
       "/- multi",
@@ -83,51 +105,51 @@ def runTest (title := "") (input : List String) (expected : List (Nat × Bool)) 
 
 #eval runTest
   (title := "sectioning comment and nested block comment")
-  [
+  #[
     "/-! hoge fuga",
       "/- foo! -/",
     "-/",
-    "def foo := 1",
+    "def foo := 1"
   ]
   [(1, false), (2, true), (1, true), (0, false)]
 
 #eval runTest
   (title := "one line doc comment")
-  [
+  #[
     "/-- hoge -/",
-    "def hoge := \"hoge\"",
+    "def hoge := \"hoge\""
   ]
   [(0, false), (0, false)]
 
 #eval runTest
   (title := "multi line doc comment")
-  [
+  #[
     "/-- hoge",
     "fuga -/",
-    "def hoge := 42",
+    "def hoge := 42"
   ]
   [(0, false), (0, false), (0, false)]
 
 #eval runTest
   (title := "raw code block")
-  [
+  #[
     "/-",
       "```lean",
       "/-- greeting -/",
       "def foo := \"Hello World!\"",
       "```",
-    "-/",
+    "-/"
   ]
   [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
 
 #eval runTest
   (title := "multi line ignoring")
-  [
+  #[
     "--#--",
     "this is ignored",
     "this is also ignored",
     "--#--",
-    "hoge",
+    "hoge"
   ]
   [(0, false)]
 

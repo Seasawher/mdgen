@@ -44,6 +44,14 @@ example (h : P) : P ∨ Q := by
 /- test of block comment in doc -/
 -/
 macro "foo" : term => `(0)
+
+inductive MyNat where
+  | zero
+  | succ (n : MyNat)
+
+-- Here is a sample of converting doc comment to block comment
+/- info: MyNat.zero : MyNat -/
+#check MyNat.zero
 ```
 
 ## nested comment
