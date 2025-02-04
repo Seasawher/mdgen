@@ -88,7 +88,7 @@ def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block 
   return {b with content := newContent}
 
 /-- convert lean contents to markdown contents. -/
-def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : List String) : Md :=
+def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : Md :=
   let blocks := buildBlocks <| analyze lines
 
   let postProcessedBlocks :=
@@ -109,7 +109,7 @@ set_option linter.unusedVariables false in
 
 /-- test for `convertToMd` -/
 def runTest (input : List String) (expected : List String) (title := "") : IO Unit := do
-  let output := convertToMd (lines := input)
+  let output := convertToMd (lines := input.toArray) -- **TODO**: don't use `toArray`
   if output ≠ expected.withBreakLine then
     throw <| .userError s!"test for \"{title}\" failed: \n{output}"
 

@@ -27,7 +27,7 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
       outputDir.components
       path.components
 
-    let newContent := convertToMd (some outputFilePath) (some outputDir) content.toList
+    let newContent := convertToMd (some outputFilePath) (some outputDir) content
     createFile (path := outputFilePath) (content := newContent)
   return 0
 

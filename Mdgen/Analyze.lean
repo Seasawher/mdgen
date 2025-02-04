@@ -18,8 +18,8 @@ instance : ToString RichLine where
   toString := RichLine.content
 
 /-- handle ignore pattern -/
-def filterIgnored (lines : List String) : List String := Id.run do
-  let mut res := []
+def filterIgnored (lines : Array String) : Array String := Id.run do
+  let mut res := #[]
   let mut ignore := false
   for line in lines do
     if line.endsWith "--#" then
@@ -29,13 +29,13 @@ def filterIgnored (lines : List String) : List String := Id.run do
       continue
     if ignore then
       continue
-    res := line :: res
-  return res.reverse
+    res := res.push line
+  return res
 
 /-- Receive a list of codes and count the nesting of block and sectioning comments.
 The corresponding opening and closing brackets should have the same level.
 -/
-def analyze (lines : List String) : List RichLine := Id.run do
+def analyze (lines : Array String) : List RichLine := Id.run do
   let lines := filterIgnored lines
   let mut res : List RichLine := []
   let mut level := 0
@@ -63,14 +63,14 @@ namespace Analyze
 set_option linter.unusedVariables false in
 
 /-- test for `analyze` function -/
-def runTest (title := "") (input : List String) (expected : List (Nat × Bool))  : IO Unit := do
+def runTest (title := "") (input : Array String) (expected : List (Nat × Bool))  : IO Unit := do
   let output := analyze input |>.map (fun x => (x.level, x.close))
   if output ≠ expected then
     throw <| .userError s!"Test failed: \n{output}"
 
 #eval runTest
   (title := "nested block comment")
-  [
+  #[
     "/-",
       "/- inline -/",
       "/- multi",
@@ -83,51 +83,51 @@ def runTest (title := "") (input : List String) (expected : List (Nat × Bool)) 
 
 #eval runTest
   (title := "sectioning comment and nested block comment")
-  [
+  #[
     "/-! hoge fuga",
       "/- foo! -/",
     "-/",
-    "def foo := 1",
+    "def foo := 1"
   ]
   [(1, false), (2, true), (1, true), (0, false)]
 
 #eval runTest
   (title := "one line doc comment")
-  [
+  #[
     "/-- hoge -/",
-    "def hoge := \"hoge\"",
+    "def hoge := \"hoge\""
   ]
   [(0, false), (0, false)]
 
 #eval runTest
   (title := "multi line doc comment")
-  [
+  #[
     "/-- hoge",
     "fuga -/",
-    "def hoge := 42",
+    "def hoge := 42"
   ]
   [(0, false), (0, false), (0, false)]
 
 #eval runTest
   (title := "raw code block")
-  [
+  #[
     "/-",
       "```lean",
       "/-- greeting -/",
       "def foo := \"Hello World!\"",
       "```",
-    "-/",
+    "-/"
   ]
   [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
 
 #eval runTest
   (title := "multi line ignoring")
-  [
+  #[
     "--#--",
     "this is ignored",
     "this is also ignored",
     "--#--",
-    "hoge",
+    "hoge"
   ]
   [(0, false)]
 
