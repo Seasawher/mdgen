@@ -33,15 +33,15 @@ def filterIgnored (lines : List String) : List String := Id.run do
   return res.reverse
 
 /-- Receive a list of codes and count the nesting of block and sectioning comments.
-* The corresponding opening and closing brackets should have the same level.
-* Also handles the exclusion of ignored targets.
+The corresponding opening and closing brackets should have the same level.
 -/
-def analysis (lines : List String) : List RichLine := Id.run do
+def analyze (lines : List String) : List RichLine := Id.run do
+  let lines := filterIgnored lines
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
   let mut blockCommentInDoc := false
-  for line in (filterIgnored lines) do
+  for line in lines do
     if line.startsWith "/--" then
       doc := true
     if line.startsWith "/-" && ! line.startsWith "/--" then
@@ -58,13 +58,13 @@ def analysis (lines : List String) : List RichLine := Id.run do
       blockCommentInDoc := false
   return res.reverse
 
-namespace Analysis
+namespace Analyze
 
 set_option linter.unusedVariables false in
 
-/-- test for `analysis` function -/
+/-- test for `analyze` function -/
 def runTest (title := "") (input : List String) (expected : List (Nat × Bool))  : IO Unit := do
-  let output := analysis input |>.map (fun x => (x.level, x.close))
+  let output := analyze input |>.map (fun x => (x.level, x.close))
   if output ≠ expected then
     throw <| .userError s!"Test failed: \n{output}"
 
@@ -131,4 +131,4 @@ def runTest (title := "") (input : List String) (expected : List (Nat × Bool)) 
   ]
   [(0, false)]
 
-end Analysis
+end Analyze

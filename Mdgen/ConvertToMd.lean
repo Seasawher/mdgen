@@ -1,4 +1,4 @@
-import Mdgen.Analysis
+import Mdgen.Analyze
 
 /-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
@@ -89,7 +89,7 @@ def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block 
 
 /-- convert lean contents to markdown contents. -/
 def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : List String) : Md :=
-  let blocks := buildBlocks <| analysis lines
+  let blocks := buildBlocks <| analyze lines
 
   let postProcessedBlocks :=
     match outputFilePath, outputDir with
