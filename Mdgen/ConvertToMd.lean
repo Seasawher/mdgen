@@ -209,7 +209,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 #eval runTest
   (title := "convert doc comment syntax")
   [
-    "/-▬-//-- doc comment -/",
+    "/-⋆-//-- doc comment -/",
     "def zero := 0",
   ]
   [
@@ -222,7 +222,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 #eval runTest
   (title := "convert doc comment syntax - multiline")
   [
-    "/-▬-//-- doc comment",
+    "/-⋆-//-- doc comment",
     "which is multiline -/",
     "def zero := 0",
   ]

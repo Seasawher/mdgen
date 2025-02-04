@@ -34,7 +34,7 @@ def filterIgnored (lines : Array String) : Array String := Id.run do
 
 /-- preprocess for converting doc comment to block comment -/
 private def preprocess (lines : Array String) : Array Nat × Array String := Id.run do
-  let token := "/-▬-//--"
+  let token := "/-⋆-//--"
   let filtered : Array (Option Nat × String) :=
     lines.mapIdx (fun idx line =>
       if line.startsWith token then
