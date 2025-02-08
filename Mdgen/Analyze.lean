@@ -82,75 +82,83 @@ def analyze (lines : Array String) : List RichLine := Id.run do
 
 namespace Analyze
 
-set_option linter.unusedVariables false in
+  set_option linter.unusedVariables false in
 
-/-- test for `analyze` function -/
-def runTest (title := "") (input : Array String) (expected : List (Nat × Bool))  : IO Unit := do
-  let output := analyze input |>.map (fun x => (x.level, x.close))
-  if output ≠ expected then
-    throw <| .userError s!"Test failed: \n{output}"
+  /-- test for `analyze` function -/
+  private def runTest (title := "") (input : Array String) (expected : List (Nat × Bool))  : IO Unit := do
+    let output := analyze input |>.map (fun x => (x.level, x.close))
+    if output ≠ expected then
+      throw <| .userError s!"Test failed: \n{output}"
 
-#eval runTest
-  (title := "nested block comment")
-  #[
-    "/-",
-      "/- inline -/",
-      "/- multi",
-      "line -/",
-      "hoge",
-    "-/",
-    "foo"
-  ]
-  [(1, false), (2, true), (2, false), (2, true), (1, false), (1, true), (0, false)]
+  #eval runTest
+    (title := "nested block comment")
+    #[
+      "/-",
+        "/- inline -/",
+        "/- multi",
+        "line -/",
+        "hoge",
+      "-/",
+      "foo"
+    ]
+    [(1, false), (2, true), (2, false), (2, true), (1, false), (1, true), (0, false)]
 
-#eval runTest
-  (title := "sectioning comment and nested block comment")
-  #[
-    "/-! hoge fuga",
-      "/- foo! -/",
-    "-/",
-    "def foo := 1"
-  ]
-  [(1, false), (2, true), (1, true), (0, false)]
+  #eval runTest
+    (title := "sectioning comment and nested block comment")
+    #[
+      "/-! hoge fuga",
+        "/- foo! -/",
+      "-/",
+      "def foo := 1"
+    ]
+    [(1, false), (2, true), (1, true), (0, false)]
 
-#eval runTest
-  (title := "one line doc comment")
-  #[
-    "/-- hoge -/",
-    "def hoge := \"hoge\""
-  ]
-  [(0, false), (0, false)]
+  #eval runTest
+    (title := "one line doc comment")
+    #[
+      "/-- hoge -/",
+      "def hoge := \"hoge\""
+    ]
+    [(0, false), (0, false)]
 
-#eval runTest
-  (title := "multi line doc comment")
-  #[
-    "/-- hoge",
-    "fuga -/",
-    "def hoge := 42"
-  ]
-  [(0, false), (0, false), (0, false)]
+  #eval runTest
+    (title := "multi line doc comment")
+    #[
+      "/-- hoge",
+      "fuga -/",
+      "def hoge := 42"
+    ]
+    [(0, false), (0, false), (0, false)]
 
-#eval runTest
-  (title := "raw code block")
-  #[
-    "/-",
-      "```lean",
-      "/-- greeting -/",
-      "def foo := \"Hello World!\"",
-      "```",
-    "-/"
-  ]
-  [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
+  #eval runTest
+    (title := "raw code block")
+    #[
+      "/-",
+        "```lean",
+        "/-- greeting -/",
+        "def foo := \"Hello World!\"",
+        "```",
+      "-/"
+    ]
+    [(1, false), (1, false), (1, false), (1, false), (1, false), (1, true)]
 
-#eval runTest
-  (title := "multi line ignoring")
-  #[
-    "--#--",
-    "this is ignored",
-    "this is also ignored",
-    "--#--",
-    "hoge"
-  ]
-  [(0, false)]
+  #eval runTest
+    (title := "multi line ignoring")
+    #[
+      "--#--",
+      "this is ignored",
+      "this is also ignored",
+      "--#--",
+      "hoge"
+    ]
+    [(0, false)]
+
+  #eval runTest
+    (title := "star doc")
+    #[
+      "/-⋆-//-- doc comment -/",
+      "def foo := 42"
+    ]
+    [(0, false), (0, false)]
 
 end Analyze
