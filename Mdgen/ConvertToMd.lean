@@ -1,4 +1,5 @@
 import Mdgen.Analyze
+import Mdgen.String
 
 /-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
@@ -43,11 +44,8 @@ partial def buildBlocks (lines : List RichLine) : List Block :=
     }
     fstBlock :: buildBlocks splited.snd
 
-/-- markdown text -/
-abbrev Md := String
-
 /-- convert a `Block` intro a markdown snippet -/
-def Block.toMd (b : Block) : Md :=
+def Block.toMd (b : Block) : String :=
   if b.content == "" then
     ""
   else if b.toCodeBlock then
@@ -65,7 +63,7 @@ instance : ToString Block where
     s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
 /-- merge blocks and build a markdown content -/
-def mergeBlocks (blocks : List Block) : Md :=
+def mergeBlocks (blocks : List Block) : String :=
   let res := blocks
     |>.map Block.toMd
     |>.foldl (· ++ ·) ""
@@ -88,7 +86,7 @@ def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block 
   return {b with content := newContent}
 
 /-- convert lean contents to markdown contents. -/
-def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : Md :=
+def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : String :=
   let blocks := buildBlocks <| analyze lines
 
   let postProcessedBlocks :=
@@ -99,24 +97,20 @@ def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Ar
 
   mergeBlocks postProcessedBlocks
 
-namespace ConvertToMd
 
-/-- add breakline for each element in a list -/
-def _root_.List.withBreakLine (as : List String) : String :=
-  as.map (· ++ "\n") |>.foldl (· ++ ·) ""
 
 set_option linter.unusedVariables false in
 
 /-- test for `convertToMd` -/
-def runTest (input : List String) (expected : List String) (title := "") : IO Unit := do
-  let output := convertToMd (lines := input.toArray) -- **TODO**: don't use `toArray`
-  if output ≠ expected.withBreakLine then
+private def runTest (input : Array String) (expected : String) (title := "") : IO Unit := do
+  let output := convertToMd (lines := input)
+  if output ≠ expected then
     throw <| .userError s!"test for \"{title}\" failed: \n{output}"
 
 #eval runTest
   (title := "inline comment")
-  ["-- this is a test"]
-  [
+  #["-- this is a test"]
+  [str|
     "```lean",
     "-- this is a test",
     "```"
@@ -124,37 +118,37 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "module document")
-  ["/-! # This is a test -/"]
-  ["# This is a test"]
+  #["/-! # This is a test -/"]
+  [str| "# This is a test"]
 
 #eval runTest
   (title := "multi line sectioning comment")
-  [
+  #[
     "/-! # This is a test",
     "of multiline section comment -/"
   ]
-  [
+  [str|
     "# This is a test",
     "of multiline section comment"
   ]
 
 #eval runTest
   (title := "empty lines")
-  ["/-! test -/", "", "", ""]
-  ["test"]
+  #["/-! test -/", "", "", ""]
+  [str| "test"]
 
 #eval runTest
   (title := "ignored lines")
-  ["this is ignored --#", "this is also ignored --#"]
-  [""]
+  #["this is ignored --#", "this is also ignored --#"]
+  [str| ""]
 
 #eval runTest
   (title := "doc comment")
-  [
+  #[
     "/-- This is a test -/",
     "def foo := 0"
   ]
-  [
+  [str|
     "```lean",
     "/-- This is a test -/",
     "def foo := 0",
@@ -163,12 +157,12 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "multi line doc comment")
-  [
+  #[
     "/-- This is a test",
     "of multiline doc comment -/",
     "def foo := 0"
   ]
-  [
+  [str|
     "```lean",
     "/-- This is a test",
     "of multiline doc comment -/",
@@ -178,12 +172,12 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "block comment in doc comment")
-  [
+  #[
     "/-- foo",
     "bar /- hoge -/",
-    "baz -/",
+    "baz -/"
   ]
-  [
+  [str|
     "```lean",
     "/-- foo",
     "bar /- hoge -/",
@@ -193,12 +187,12 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "leading block comment in doc comment")
-  [
+  #[
     "/-- foo",
     "/- hoge bar -/",
-    "baz -/",
+    "baz -/"
   ]
-  [
+  [str|
     "```lean",
     "/-- foo",
     "/- hoge bar -/",
@@ -208,11 +202,11 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "convert doc comment syntax")
-  [
+  #[
     "/-⋆-//-- doc comment -/",
-    "def zero := 0",
+    "def zero := 0"
   ]
-  [
+  [str|
     "```lean",
     "/- doc comment -/",
     "def zero := 0",
@@ -221,12 +215,12 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "convert doc comment syntax - multiline")
-  [
+  #[
     "/-⋆-//-- doc comment",
     "which is multiline -/",
-    "def zero := 0",
+    "def zero := 0"
   ]
-  [
+  [str|
     "```lean",
     "/- doc comment",
     "which is multiline -/",
@@ -236,13 +230,13 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "convert doc comment syntax - indent")
-  [
+  #[
     "namespace Foo",
     "  /-⋆-//-- doc comment -/",
     "  def zero := 0",
-    "end Foo",
+    "end Foo"
   ]
-  [
+  [str|
     "```lean",
     "namespace Foo",
     "  /- doc comment -/",
@@ -253,13 +247,13 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "multiple leading block comments in doc comment")
-  [
+  #[
     "/-- foo",
     "/- hoge bar -/",
     "/- fuga -/ baz",
-    "baz -/",
+    "baz -/"
   ]
-  [
+  [str|
     "```lean",
     "/-- foo",
     "/- hoge bar -/",
@@ -270,29 +264,29 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "block comment")
-  ["/- this is a test -/"]
-  ["this is a test"]
+  #["/- this is a test -/"]
+  [str| "this is a test"]
 
 #eval runTest
   (title := "multi line block comment")
-  [
+  #[
     "/-",
     "this is a test",
-    "of multiline block comment -/",
+    "of multiline block comment -/"
   ]
-  [
+  [str|
     "this is a test",
     "of multiline block comment"
   ]
 
 #eval runTest
   (title := "respect indent")
-  [
+  #[
     "hoge",
     "  fuga",
-    "  monyo",
+    "  monyo"
   ]
-  [
+  [str|
     "```lean",
     "hoge",
     "  fuga",
@@ -302,11 +296,11 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "consecutive single-line block comments.")
-  [
+  #[
     "/- hoge -/",
-    "/- fuga -/",
+    "/- fuga -/"
   ]
-  [
+  [str|
     "hoge",
     "",
     "fuga"
@@ -314,13 +308,13 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "nested block comment")
-  [
+  #[
     "/-",
     "this is a test",
     "/- nested comment -/",
     "of nested block comment -/"
   ]
-  [
+  [str|
     "this is a test",
     "/- nested comment -/",
     "of nested block comment"
@@ -328,16 +322,16 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "raw code block")
-  [
+  #[
     "/-",
     "```lean",
     "/- this is test -/",
     "```",
     "fuga",
     "-/",
-    "/- hoge -/",
+    "/- hoge -/"
   ]
-  [
+  [str|
     "```lean",
     "/- this is test -/",
     "```",
@@ -348,14 +342,14 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "indent in raw code block")
-  [
+  #[
     "/-",
     "```lean",
     "  hoge",
     "```",
     "-/"
   ]
-  [
+  [str|
     "```lean",
     "  hoge",
     "```"
@@ -363,15 +357,15 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "doc comment in raw code block")
-  [
+  #[
     "/-",
     "```lean",
     "/-- foo -/",
     "def zero := 0",
     "```",
-    "-/",
+    "-/"
   ]
-  [
+  [str|
     "```lean",
     "/-- foo -/",
     "def zero := 0",
@@ -380,7 +374,7 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
 
 #eval runTest
   (title := "multiple raw code blocks")
-  [
+  #[
     "/-",
     "```lean",
     "/-- greeting -/",
@@ -392,9 +386,9 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "",
     "def one := 1",
     "```",
-    "-/",
+    "-/"
   ]
-  [
+  [str|
     "```lean",
     "/-- greeting -/",
     "def foo := \"Hello World!\"",
@@ -404,7 +398,5 @@ def runTest (input : List String) (expected : List String) (title := "") : IO Un
     "/-! ### second code block -/",
     "",
     "def one := 1",
-    "```",
+    "```"
   ]
-
-end ConvertToMd
