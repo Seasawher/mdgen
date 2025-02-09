@@ -6,8 +6,12 @@ structure Block where
   /-- content of block -/
   content : String
 
-  /-- whether the `content` is converted into code section in markdown -/
-  codeBlock : Bool
+  /-- whether the `content` is converted into code section in markdown.
+
+  * `none` means the content is not a code block.
+  * `some lang` means the content is a code block with the given language.
+  -/
+  codeBlock : Option String
   deriving Repr
 
 /-- a variant of `List.span` which return a list including
@@ -38,17 +42,18 @@ where
           |>.map (·.content ++ "\n")
           |>.foldl (· ++ ·) ""
           |>.trim,
-        codeBlock := (level == 0)
+        codeBlock := if level == 0 then some "lean" else none
       }
       helper splited.snd (fstBlock :: acc)
 
 /-- convert a `Block` intro a markdown snippet -/
-protected def Block.toString (b : Block) : String :=
+protected def Block.toString (b : Block) : String := Id.run do
   if b.content == "" then
-    ""
-  else if b.codeBlock then
-    "```lean\n" ++ b.content ++ "\n```\n\n"
-  else
+    return ""
+
+  match b.codeBlock with
+  | some lang => s!"```{lang}\n" ++ b.content ++ "\n```\n\n"
+  | none =>
     let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
     b.content
       |> (String.drop · separator.length)
@@ -68,7 +73,7 @@ open System FilePath
 /-- Handle uniform internal link syntax.
 This converts `#{root}` in internal link to repeated `../` string -/
 def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
-  if b.codeBlock then
+  if b.codeBlock.isSome then
     return b
 
   let pathPrefix := relativePath outputFilePath outputDir
