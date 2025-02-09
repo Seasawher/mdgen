@@ -1,5 +1,10 @@
 def main : IO UInt32 := do
-  let testTargets := ["First.md", "Second/Second.md"]
+  let testTargets := [
+    "First.md",
+    "Second/Second.md",
+    "Third/Third/Third.md",
+    "Fourth.md"
+  ]
 
   for test_file in testTargets do
     let actual ← IO.FS.readFile ⟨s!"Test/Out/{test_file}"⟩
