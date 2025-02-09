@@ -10,10 +10,6 @@ structure Block where
   toCodeBlock : Bool
   deriving Repr
 
-instance : ToString Block where
-  toString := fun b =>
-    s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
-
 /-- a variant of `List.span` which return a list including
 at most one "edge" element -/
 def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × List α :=
@@ -57,10 +53,6 @@ def Block.toMd (b : Block) : String :=
       |> (String.dropRight · "-/".length)
       |> String.trim
       |> (· ++ "\n\n")
-
-instance : ToString Block where
-  toString := fun b =>
-    s!"content: \n{b.content}\n toCodeBlock: {b.toCodeBlock}\n\n"
 
 /-- merge blocks and build a markdown content -/
 def mergeBlocks (blocks : List Block) : String :=
