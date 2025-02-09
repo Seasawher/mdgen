@@ -20,25 +20,28 @@ def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × 
 
 /-- build a `Block` from a `RichLine` -/
 partial def buildBlocks (lines : List RichLine) : List Block :=
-  match lines with
-  | [] => []
-  | line :: _ =>
-    let ⟨_, level, _⟩ := line
-    let splited := (
-      if level == 0 then
-        lines.span (fun x => x.level == 0)
-      else
-        lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
-    )
-    let fstBlock : Block := {
-      content := splited.fst
-        |>.map (·.content)
-        |>.map (· ++ "\n")
-        |>.foldl (· ++ ·) ""
-        |>.trim,
-      toCodeBlock := (level == 0)
-    }
-    fstBlock :: buildBlocks splited.snd
+  helper lines []
+where
+  helper (lines : List RichLine) (acc : List Block) : List Block :=
+    match lines with
+    | [] => acc.reverse
+    | line :: _ =>
+      let ⟨_, level, _⟩ := line
+      let splited := (
+        if level == 0 then
+          lines.span (fun x => x.level == 0)
+        else
+          lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
+      )
+      let fstBlock : Block := {
+        content := splited.fst
+          |>.map (·.content)
+          |>.map (· ++ "\n")
+          |>.foldl (· ++ ·) ""
+          |>.trim,
+        toCodeBlock := (level == 0)
+      }
+      helper splited.snd (fstBlock :: acc)
 
 /-- convert a `Block` intro a markdown snippet -/
 def Block.toMd (b : Block) : String :=
