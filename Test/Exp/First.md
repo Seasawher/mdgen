@@ -60,6 +60,8 @@ namespace MyNat
   #check MyNat.succ MyNat.zero
 
 end MyNat
+
+macro "echo" x:str : command => `(#eval $x)
 ```
 
 ## nested comment
@@ -74,6 +76,11 @@ Here is another example of nested block comment:
 
 /-- this is doc comment in comment block -/
 def foo : Nat := 0
+```
+
+```text
+-- test for language metadata for code block
+echo "Hello, world!"
 ```
 
 ## Uniform Internal Link Syntax

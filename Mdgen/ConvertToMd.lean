@@ -22,6 +22,14 @@ def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × 
   | [] => (l, [])
   | y :: ys => (l ++ [y], ys)
 
+/-- Preprocess `RichLine` and extract metadata to be attached to code blocks -/
+def RichLine.preprocess (line : RichLine) : RichLine × Option String :=
+  if line.content.startsWith "-- ⋆MDGEN_LANG⋆=" then
+    let lang := line.content.drop "-- ⋆MDGEN_LANG⋆=".length
+    ({line with content := ""}, some lang)
+  else
+    (line, none)
+
 /-- build a `Block` from a `RichLine` -/
 partial def buildBlocks (lines : List RichLine) : List Block :=
   helper lines []
@@ -29,7 +37,10 @@ where
   helper (lines : List RichLine) (acc : List Block) : List Block :=
     match lines with
     | [] => acc.reverse
-    | line :: _ =>
+    | line :: rest =>
+      let (line, lang?) := line.preprocess
+      let lines := line :: rest
+
       let ⟨_, level, _⟩ := line
       let splited := (
         if level == 0 then
@@ -42,7 +53,7 @@ where
           |>.map (·.content ++ "\n")
           |>.foldl (· ++ ·) ""
           |>.trim,
-        codeBlock := if level == 0 then some "lean" else none
+        codeBlock := if level == 0 then some (lang?.getD "lean") else none
       }
       helper splited.snd (fstBlock :: acc)
 
@@ -397,5 +408,17 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
     "/-! ### second code block -/",
     "",
     "def one := 1",
+    "```"
+  ]
+
+#eval runTest
+  (title := "lang metadata")
+  #[
+    "-- ⋆MDGEN_LANG⋆={#lst:id .lean caption=\"foo\"}",
+    "def foo := 0"
+  ]
+  [str|
+    "```{#lst:id .lean caption=\"foo\"}",
+    "def foo := 0",
     "```"
   ]
