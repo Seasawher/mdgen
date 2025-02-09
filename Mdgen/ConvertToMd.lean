@@ -7,7 +7,7 @@ structure Block where
   content : String
 
   /-- whether the `content` is converted into code section in markdown -/
-  toCodeBlock : Bool
+  codeBlock : Bool
   deriving Repr
 
 /-- a variant of `List.span` which return a list including
@@ -35,19 +35,18 @@ where
       )
       let fstBlock : Block := {
         content := splited.fst
-          |>.map (·.content)
-          |>.map (· ++ "\n")
+          |>.map (·.content ++ "\n")
           |>.foldl (· ++ ·) ""
           |>.trim,
-        toCodeBlock := (level == 0)
+        codeBlock := (level == 0)
       }
       helper splited.snd (fstBlock :: acc)
 
 /-- convert a `Block` intro a markdown snippet -/
-def Block.toMd (b : Block) : String :=
+protected def Block.toString (b : Block) : String :=
   if b.content == "" then
     ""
-  else if b.toCodeBlock then
+  else if b.codeBlock then
     "```lean\n" ++ b.content ++ "\n```\n\n"
   else
     let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
@@ -60,7 +59,7 @@ def Block.toMd (b : Block) : String :=
 /-- merge blocks and build a markdown content -/
 def mergeBlocks (blocks : List Block) : String :=
   let res := blocks
-    |>.map Block.toMd
+    |>.map Block.toString
     |>.foldl (· ++ ·) ""
   res.trim ++ "\n"
 
@@ -69,7 +68,7 @@ open System FilePath
 /-- Handle uniform internal link syntax.
 This converts `#{root}` in internal link to repeated `../` string -/
 def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
-  if b.toCodeBlock then
+  if b.codeBlock then
     return b
 
   let pathPrefix := relativePath outputFilePath outputDir
