@@ -24,7 +24,10 @@ require Cli from git
 lean_exe «mdgen» where
   root := `Mdgen
 
-def runCmd (input : String) : IO Unit := do
+def IO.Process.Output.toString (self : IO.Process.Output) : String :=
+  self.stdout.trimRight
+
+def runCmdAux (input : String) : IO String := do
   let cmdList := input.splitOn " "
   let cmd := cmdList.head!
   let args := cmdList.tail |>.toArray
@@ -33,13 +36,35 @@ def runCmd (input : String) : IO Unit := do
     args := args
   }
   if out.exitCode != 0 then
-    IO.eprintln out.stderr
+    IO.println out.stderr
     throw <| IO.userError s!"Failed to execute: {input}"
-  else if !out.stdout.isEmpty then
-    IO.println out.stdout
+
+  return out.toString
+
+def runCmd (input : String) : IO Unit := do
+  let _ ← runCmdAux input
+  return ()
+
+instance : ToString IO.Process.Output := ⟨IO.Process.Output.toString⟩
+
+def checkVersion : IO Unit := do
+  let out ← runCmdAux "lake exe mdgen --version"
+  let cliVer := out
+  let libVer := _package.version.toString
+  if cliVer != libVer then
+    IO.eprintln s!"Version mismatch: CLI {cliVer}, Library {libVer}"
+    throw <| IO.userError "Version mismatch"
+
+  let latest ← runCmdAux "git rev-list --tags --max-count=1"
+  let latestVer ← runCmdAux s!"git describe --tags {latest}"
+
+  if libVer != latestVer then
+    IO.println s!"warning: latest release tag is {latestVer}, which is not the same as the library version {libVer}."
+
 
 /-- run test by `lake test` -/
 @[test_driver] script test do
+  checkVersion
   runCmd "lake exe mdgen Test/Src Test/Out"
   runCmd "lean --run Test.lean"
   return 0
