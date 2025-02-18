@@ -48,19 +48,11 @@ def runCmd (input : String) : IO Unit := do
 instance : ToString IO.Process.Output := ⟨IO.Process.Output.toString⟩
 
 def checkVersion : IO Unit := do
-  let out ← runCmdAux "lake exe mdgen --version"
-  let cliVer := out
+  let cliVer ← runCmdAux "lake exe mdgen --version"
   let libVer := _package.version.toString
   if cliVer != libVer then
     IO.eprintln s!"Version mismatch: CLI {cliVer}, Library {libVer}"
     throw <| IO.userError "Version mismatch"
-
-  let latest ← runCmdAux "git rev-list --tags --max-count=1"
-  let latestVer ← runCmdAux s!"git describe --tags {latest}"
-
-  if libVer != latestVer then
-    IO.println s!"warning: latest release tag is {latestVer}, which is not the same as the library version {libVer}."
-
 
 /-- run test by `lake test` -/
 @[test_driver] script test do
