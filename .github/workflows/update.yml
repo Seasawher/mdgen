@@ -1,23 +1,14 @@
 name: Update Lean
 on:
   schedule:
-    - cron: "0 11 * * 4"
+    - cron: "0 11 * * *"
   workflow_dispatch:
 
 jobs:
   update_lean:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
-      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Update Lean project
-        uses: oliver-butterley/lean-update@v1-alpha
-        with:
-          #  Allowed values: "silent", "commit", "issue" or "pr". Default: "commit".
-          on_update_succeeds: pr
-          # Allowed values: "silent", "issue" or "fail". Default: "issue".
-          on_update_fails: issue
+        uses: Seasawher/lean-update@main
