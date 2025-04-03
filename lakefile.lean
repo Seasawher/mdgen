@@ -49,7 +49,7 @@ instance : ToString IO.Process.Output := ⟨IO.Process.Output.toString⟩
 
 def checkVersion : IO Unit := do
   let cliVer ← runCmdAux "lake exe mdgen --version"
-  let libVer := _package.version.toString
+  let libVer := _package.config.version.toString
   if cliVer != libVer then
     IO.eprintln s!"Version mismatch: CLI {cliVer}, Library {libVer}"
     throw <| IO.userError "Version mismatch"
