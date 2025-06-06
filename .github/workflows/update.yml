@@ -12,3 +12,5 @@ jobs:
         uses: actions/checkout@v4
       - name: Update Lean project
         uses: Seasawher/lean-update@main
+        with:
+          update_if_modified: lean-toolchain
