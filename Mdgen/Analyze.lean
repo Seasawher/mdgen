@@ -33,7 +33,7 @@ def filterIgnored (lines : Array String) : Array String := Id.run do
   return res
 
 /-- preprocess for converting doc comment to block comment -/
-private def preprocess (lines : Array String) : Array Nat × Array String := Id.run do
+def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String := Id.run do
   let token := "/-⋆-//--"
   let filtered : Array (Option Nat × String) :=
     lines.mapIdx (fun idx line =>
@@ -47,7 +47,7 @@ private def preprocess (lines : Array String) : Array Nat × Array String := Id.
   return (indexes, contents)
 
 /-- postprocess for converting doc comment to block comment -/
-private def postprocess (indexes : Array Nat) (i : Nat) (line : String) : String :=
+def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : String) : String :=
   if indexes.contains i then
     line.replace "/--" "/-"
   else
@@ -57,7 +57,7 @@ private def postprocess (indexes : Array Nat) (i : Nat) (line : String) : String
 The corresponding opening and closing brackets should have the same level.
 -/
 def analyze (lines : Array String) : List RichLine := Id.run do
-  let (indexes, lines) := preprocess <| filterIgnored lines
+  let (indexes, lines) := preprocessForDocToBlock (filterIgnored lines)
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
@@ -70,7 +70,7 @@ def analyze (lines : Array String) : List RichLine := Id.run do
         level := level + 1
       else
         blockCommentInDoc := true
-    let newLine := postprocess indexes i line
+    let newLine := postprocessForDocToBlock indexes i line
     res := {content := newLine, level := level, close := line.endsWith "-/" && ! doc} :: res
     if line.endsWith "-/" then
       if ! doc then
