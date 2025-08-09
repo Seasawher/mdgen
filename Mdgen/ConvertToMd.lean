@@ -37,8 +37,8 @@ where
   helper (lines : List RichLine) (acc : List Block) : List Block :=
     match lines with
     | [] => acc.reverse
-    | line :: rest =>
-      let (line, lang?) := line.preprocess
+    | raw_line :: rest =>
+      let (line, lang?) := raw_line.preprocess
       let lines := line :: rest
 
       let ⟨_, level, _⟩ := line
