@@ -32,7 +32,12 @@ def filterIgnored (lines : Array String) : Array String := Id.run do
     res := res.push line
   return res
 
-/-- preprocess for converting doc comment to block comment -/
+/-- preprocess for converting doc comment to block comment
+
+#### Return
+* `indexes`: the indexes of lines which are converted from doc comment to block comment.
+* `contents`: the contents of lines after preprocessing.
+-/
 def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String := Id.run do
   let token := "/-⋆-//--"
   let filtered : Array (Option Nat × String) :=
