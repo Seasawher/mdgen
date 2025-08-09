@@ -1,5 +1,6 @@
 import Mdgen.Analyze
 import Mdgen.String
+import Mdgen.List
 
 /-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
@@ -13,14 +14,6 @@ structure Block where
   -/
   codeBlock : Option String
   deriving Repr
-
-/-- a variant of `List.span` which return a list including
-at most one "edge" element -/
-def List.spanWithEdge {α : Type} (p : α → Bool) (as : List α) : List α × List α :=
-  let ⟨l, r⟩ := as.span p
-  match r with
-  | [] => (l, [])
-  | y :: ys => (l ++ [y], ys)
 
 /-- Preprocess `RichLine` and extract metadata to be attached to code blocks -/
 def RichLine.preprocess (line : RichLine) : RichLine × Option String :=
