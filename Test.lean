@@ -1,3 +1,4 @@
+/-- This is a test for the markdown generator -/
 def main : IO UInt32 := do
   let testTargets := [
     "First.md",
