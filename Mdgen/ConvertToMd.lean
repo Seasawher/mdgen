@@ -76,7 +76,7 @@ open System FilePath
 
 /-- Handle uniform internal link syntax.
 This converts `#{root}` in internal link to repeated `../` string -/
-def Block.postProcess (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
+def Block.handleUILStx (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
   if b.codeBlock.isSome then
     return b
 
@@ -95,7 +95,7 @@ def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Ar
   let postProcessedBlocks :=
     match outputFilePath, outputDir with
     | some outputFilePath, some outputDir =>
-      blocks.map (Block.postProcess outputFilePath outputDir)
+      blocks.map (Block.handleUILStx outputFilePath outputDir)
     | _, _ => blocks
 
   mergeBlocks postProcessedBlocks
