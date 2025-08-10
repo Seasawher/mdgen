@@ -37,6 +37,8 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆LANG⋆=` on the first line of the code section.
 
+* If you write `-- ⋆QUOTE⋆` on the first line of the code, `> ` will be inserted at the beginning of every line in that code block, turning it into a quoted code block.
+
 If you want to know more details, check the test code.
 
 * [source](./Test/Src/First.lean)
