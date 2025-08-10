@@ -20,7 +20,7 @@ structure Block where
 
 /-- Preprocess `RichLine` and extract metadata to be attached to code blocks -/
 def RichLine.handleLangMeta (line : RichLine) : RichLine × Option String :=
-  let token := "-- ⋆MDGEN_LANG⋆="
+  let token := "-- ⋆LANG⋆="
   if line.content.startsWith token then
     let lang := line.content.drop token.length
     ({line with content := ""}, some lang)
@@ -436,7 +436,7 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
 #eval runTest
   (title := "lang metadata")
   #[
-    "-- ⋆MDGEN_LANG⋆={#lst:id .lean caption=\"foo\"}",
+    "-- ⋆LANG⋆={#lst:id .lean caption=\"foo\"}",
     "def foo := 0"
   ]
   [str|

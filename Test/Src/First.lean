@@ -89,7 +89,7 @@ Here is another example of nested block comment:
 def foo : Nat := 0
 ```
 -/
--- ⋆MDGEN_LANG⋆=text
+-- ⋆LANG⋆=text
 
 -- test for language metadata for code block
 echo "Hello, world!"

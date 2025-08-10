@@ -35,7 +35,7 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * You can convert a doc comment to a block comment. Simply insert `/-⋆-/` immediately before the doc comment `/-- foo -/` without any whitespace.
 
-* By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆MDGEN_LANG⋆=` on the first line of the code section.
+* By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆LANG⋆=` on the first line of the code section.
 
 If you want to know more details, check the test code.
 
