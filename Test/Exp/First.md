@@ -83,6 +83,14 @@ def foo : Nat := 0
 echo "Hello, world!"
 ```
 
+## quoted code
+
+> Here is a sample of quoted code:
+> ```lean
+> def greet := "hello, world"
+> ```
+> quoted code says something.
+
 ## Uniform Internal Link Syntax
 
 * [link to Second.md](Second/Second.md)

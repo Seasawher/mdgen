@@ -7,6 +7,7 @@ this is a block comment
 
 -- ignore these line --#
 import Lean --#
+set_option linter.missingDocs false --#
 
 --#--
 def thisIsIgnored : Nat := 0
@@ -93,6 +94,16 @@ def foo : Nat := 0
 
 -- test for language metadata for code block
 echo "Hello, world!"
+
+/- ## quoted code
+
+> Here is a sample of quoted code:
+-/
+-- ⋆QUOTE⋆
+def greet := "hello, world"
+/-
+> quoted code says something.
+-/
 
 /- ## Uniform Internal Link Syntax
 
