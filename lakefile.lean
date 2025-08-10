@@ -2,7 +2,7 @@ import Lake
 open Lake DSL
 
 package «mdgen» where
-  version := v!"1.11.0"
+  version := v!"2.0.0"
   keywords := #["cli", "markdown"]
   description := "Tool to generate markdown files from lean files."
 
