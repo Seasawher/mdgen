@@ -16,7 +16,7 @@ structure Block where
   deriving Repr
 
 /-- Preprocess `RichLine` and extract metadata to be attached to code blocks -/
-def RichLine.preprocess (line : RichLine) : RichLine × Option String :=
+def RichLine.handleLangMeta (line : RichLine) : RichLine × Option String :=
   if line.content.startsWith "-- ⋆MDGEN_LANG⋆=" then
     let lang := line.content.drop "-- ⋆MDGEN_LANG⋆=".length
     ({line with content := ""}, some lang)
@@ -31,7 +31,7 @@ where
     match lines with
     | [] => acc.reverse
     | raw_line :: rest =>
-      let (line, lang?) := raw_line.preprocess
+      let (line, lang?) := raw_line.handleLangMeta
       let lines := line :: rest
 
       let ⟨_, level, _⟩ := line
