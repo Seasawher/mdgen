@@ -13,15 +13,26 @@ structure Block where
   * `some lang` means the content is a code block with the given language.
   -/
   codeBlock : Option String
+
+  /-- whether the block is quoted -/
+  quoted : Bool
   deriving Repr
 
 /-- Preprocess `RichLine` and extract metadata to be attached to code blocks -/
 def RichLine.handleLangMeta (line : RichLine) : RichLine × Option String :=
-  if line.content.startsWith "-- ⋆MDGEN_LANG⋆=" then
-    let lang := line.content.drop "-- ⋆MDGEN_LANG⋆=".length
+  let token := "-- ⋆MDGEN_LANG⋆="
+  if line.content.startsWith token then
+    let lang := line.content.drop token.length
     ({line with content := ""}, some lang)
   else
     (line, none)
+
+/-- Preprocess `RichLine` and extract metadata for quotes -/
+def RichLine.handleQuote (line : RichLine) : RichLine × Bool :=
+  if line.content == "-- ⋆QUOTE⋆" then
+    ({line with content := ""}, true)
+  else
+    (line, false)
 
 /-- build a `Block` from a `RichLine` -/
 partial def buildBlocks (lines : List RichLine) : List Block :=
@@ -30,8 +41,9 @@ where
   helper (lines : List RichLine) (acc : List Block) : List Block :=
     match lines with
     | [] => acc.reverse
-    | raw_line :: rest =>
-      let (line, lang?) := raw_line.handleLangMeta
+    | line :: rest =>
+      let (line, lang?) := line.handleLangMeta
+      let (line, quoted) := line.handleQuote
       let lines := line :: rest
 
       let ⟨_, level, _⟩ := line
@@ -43,27 +55,33 @@ where
       )
       let fstBlock : Block := {
         content := splited.fst
-          |>.map (·.content ++ "\n")
+          |>.dropWhile (fun line => quoted && line.content == "")
+          |>.map (fun line => line.content ++ "\n")
+          |>.map (fun raw_line => if quoted then "> " ++ raw_line else raw_line)
           |>.foldl (· ++ ·) ""
           |>.trim,
         codeBlock := if level == 0 then some (lang?.getD "lean") else none
+        quoted := quoted
       }
       helper splited.snd (fstBlock :: acc)
 
 /-- convert a `Block` intro a markdown snippet -/
 protected def Block.toString (b : Block) : String := Id.run do
   if b.content == "" then
-    return ""
+    return "\n"
 
   match b.codeBlock with
-  | some lang => s!"```{lang}\n" ++ b.content ++ "\n```\n\n"
+  | some lang =>
+    match b.quoted with
+    | false => s!"\n```{lang}\n" ++ b.content ++ "\n```\n\n"
+    | true => s!"> ```{lang}\n" ++ b.content ++ "\n> ```\n"
   | none =>
     let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
     b.content
       |> (String.drop · separator.length)
       |> (String.dropRight · "-/".length)
       |> String.trim
-      |> (· ++ "\n\n")
+      |> (· ++ "\n")
 
 /-- merge blocks and build a markdown content -/
 def mergeBlocks (blocks : List Block) : String :=
@@ -305,6 +323,18 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
   ]
   [str|
     "hoge",
+    "fuga"
+  ]
+
+#eval runTest
+  (title := "insert empty line")
+  #[
+    "/- hoge -/",
+    "",
+    "/- fuga -/"
+  ]
+  [str|
+    "hoge",
     "",
     "fuga"
   ]
@@ -339,7 +369,6 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
     "/- this is test -/",
     "```",
     "fuga",
-    "",
     "hoge"
   ]
 
@@ -414,4 +443,40 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
     "```{#lst:id .lean caption=\"foo\"}",
     "def foo := 0",
     "```"
+  ]
+
+#eval runTest
+  (title := "quoted code")
+  #[
+    "-- ⋆QUOTE⋆",
+    "def foo := 42",
+    "",
+    "def hoge := 22",
+  ]
+  [str|
+    "> ```lean",
+    "> def foo := 42",
+    "> ",
+    "> def hoge := 22",
+    "> ```"
+  ]
+
+#eval runTest
+  (title := "quoted code insertion")
+  #[
+    "/-",
+    "> hoge",
+    "-/",
+    "-- ⋆QUOTE⋆",
+    "def foo := 42",
+    "/-",
+    "> foo is foo",
+    "-/",
+  ]
+  [str|
+    "> hoge",
+    "> ```lean",
+    "> def foo := 42",
+    "> ```",
+    "> foo is foo"
   ]

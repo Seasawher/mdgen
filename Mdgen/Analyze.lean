@@ -157,3 +157,11 @@ private def runTest (title := "") (input : Array String) (expected : List (Nat Ã
     "hoge"
   ]
   [(0, false)]
+
+#eval runTest
+  (title := "empty lines")
+  #[
+    "",
+    ""
+  ]
+  [(0, false), (0, false)]
