@@ -48,6 +48,13 @@ If you want to know more details, check the test code.
 
 * `-c`, `--count`: Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate.
 
+* `-e`, `--exercise`: Erases parts of Lean code and replaces them with `sorry`.
+  * Replace the code enclosed by `-- sorry` with `sorry`, preserving indentation.
+  * Replace the inline code enclosed by `/-+-/` with `sorry`.
+  * Replace the code after `/- sorry -/` with sorry.
+  * Lines ending with `--##` are ignored.
+  * Blocks enclosed with `--##--` are ignored.
+
 ## Acknowledgments
 
 I would like to acknowledge the author of [lean2md](https://github.com/arthurpaulino/lean2md), [@arthurpaulino](https://github.com/arthurpaulino).

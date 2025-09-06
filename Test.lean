@@ -4,7 +4,8 @@ def main : IO UInt32 := do
     "First.md",
     "Second/Second.md",
     "Third/Third/Third.md",
-    "Fourth.md"
+    "Fourth.md",
+    "Exercise.md"
   ]
 
   for test_file in testTargets do

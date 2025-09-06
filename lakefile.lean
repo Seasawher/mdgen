@@ -2,7 +2,7 @@ import Lake
 open Lake DSL
 
 package «mdgen» where
-  version := v!"2.0.0"
+  version := v!"2.1.0"
   keywords := #["cli", "markdown"]
   description := "Tool to generate markdown files from lean files."
 
@@ -58,5 +58,6 @@ def checkVersion : IO Unit := do
 @[test_driver] script test do
   checkVersion
   runCmd "lake exe mdgen Test/Src Test/Out"
+  runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
   runCmd "lean --run Test.lean"
   return 0
