@@ -41,7 +41,7 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
 /-- API definition of `mdgen` command -/
 def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; ["4.24.0-rc1"]
+  mdgen VIA runMdgenCmd; [Lean.versionString]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:
