@@ -2,6 +2,8 @@ import Mdgen.File
 import Mdgen.ConvertToMd
 import Mdgen.MkExercise
 import Cli
+import Std
+import Lean
 
 open Cli System FilePath
 
@@ -39,9 +41,22 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
     createFile (path := outputFilePath) (content := newContent)
   return 0
 
+/-- Get the release date of the project -/
+def getReleaseDate : IO String := do
+  let date ← Std.Time.PlainDate.now
+  return date.format "uuuu-MM-dd"
+
+/-- version message of `mdgen --version` -/
+unsafe def versionMsg : String :=
+  let dateExcept := unsafeIO getReleaseDate
+  let date := match dateExcept with
+    | Except.ok date => date
+    | Except.error _ => "unknown date"
+  s!"{Lean.versionString} (released on {date})"
+
 /-- API definition of `mdgen` command -/
-def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; [Lean.versionString]
+unsafe def mkMdgenCmd : Cmd := `[Cli|
+  mdgen VIA runMdgenCmd; [versionMsg]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:
