@@ -43,8 +43,11 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
 /-- Get the release date of the project -/
 def getReleaseDate : IO String := do
-  let date ← Std.Time.PlainDate.now
-  return date.format "uuuu-MM-dd"
+  let out ← IO.Process.output {
+    cmd := "git"
+    args := #["log", "-1", "--format=%cs"]
+  }
+  return out.stdout.trimRight
 
 /-- version message of `mdgen --version` -/
 unsafe def versionMsg : String :=
