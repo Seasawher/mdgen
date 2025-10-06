@@ -2,7 +2,6 @@ import Lake
 open Lake DSL
 
 package «mdgen» where
-  version := v!"4.24.0-rc1"
   keywords := #["cli", "markdown"]
   description := "Tool to generate markdown files from lean files."
 
@@ -24,9 +23,6 @@ require Cli from git
 lean_exe «mdgen» where
   root := `Mdgen
 
-def IO.Process.Output.toString (self : IO.Process.Output) : String :=
-  self.stdout.trimRight
-
 def runCmdAux (input : String) : IO String := do
   let cmdList := input.splitOn " "
   let cmd := cmdList.head!
@@ -39,24 +35,24 @@ def runCmdAux (input : String) : IO String := do
     IO.println out.stderr
     throw <| IO.userError s!"Failed to execute: {input}"
 
-  return out.toString
+  return out.stdout.trimRight
 
 def runCmd (input : String) : IO Unit := do
   let _ ← runCmdAux input
   return ()
 
-instance : ToString IO.Process.Output := ⟨IO.Process.Output.toString⟩
-
-def checkVersion : IO Unit := do
-  let cliVer ← runCmdAux "lake exe mdgen --version"
-  let libVer := _package.config.version.toString
-  if cliVer != libVer then
-    IO.eprintln s!"Version mismatch: CLI {cliVer}, Library {libVer}"
-    throw <| IO.userError "Version mismatch"
+/-- check output of `mdgen --version` -/
+def checkVersionString : IO Unit := do
+  let version := s!"v{Lean.versionString}"
+  let out ← runCmdAux "lake exe mdgen --version"
+  if out != version then
+    throw <| IO.userError s!"Version mismatch. expected {version}, got {out}"
+  else
+    IO.println s!"Version check passed: {out}"
 
 /-- run test by `lake test` -/
 @[test_driver] script test do
-  checkVersion
+  checkVersionString
   runCmd "lake exe mdgen Test/Src Test/Out"
   runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
   runCmd "lean --run Test.lean"

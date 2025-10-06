@@ -1,6 +1,5 @@
 import Mdgen.Cli
 
-set_option linter.missingDocs false
-
+/-- the main entry point -/
 def main (args : List String) : IO UInt32 :=
   mkMdgenCmd.validate args
