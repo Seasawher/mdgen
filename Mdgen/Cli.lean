@@ -2,8 +2,6 @@ import Mdgen.File
 import Mdgen.ConvertToMd
 import Mdgen.MkExercise
 import Cli
-import Std
-import Lean
 
 open Cli System FilePath
 
@@ -40,8 +38,6 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
     let newContent := convertToMd (some outputFilePath) (some outputDir) content
     createFile (path := outputFilePath) (content := newContent)
   return 0
-
-
 
 /-- API definition of `mdgen` command -/
 def mkMdgenCmd : Cmd := `[Cli|
