@@ -41,25 +41,11 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
     createFile (path := outputFilePath) (content := newContent)
   return 0
 
-/-- Get the release date of the project -/
-def getReleaseDate : IO String := do
-  let out ← IO.Process.output {
-    cmd := "git"
-    args := #["log", "-1", "--format=%cs"]
-  }
-  return out.stdout.trimRight
 
-/-- version message of `mdgen --version` -/
-unsafe def versionMsg : String :=
-  let dateExcept := unsafeIO getReleaseDate
-  let date := match dateExcept with
-    | Except.ok date => date
-    | Except.error _ => "unknown date"
-  s!"{Lean.versionString} (released on {date})"
 
 /-- API definition of `mdgen` command -/
-unsafe def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; [versionMsg]
+def mkMdgenCmd : Cmd := `[Cli|
+  mdgen VIA runMdgenCmd; ["v4.24.0-rc1"]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:

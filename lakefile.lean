@@ -41,8 +41,18 @@ def runCmd (input : String) : IO Unit := do
   let _ ← runCmdAux input
   return ()
 
+/-- check output of `mdgen --version` -/
+def checkVersionString : IO Unit := do
+  let version := s!"v{Lean.versionString}"
+  let out ← runCmdAux "lake exe mdgen --version"
+  if out != version then
+    throw <| IO.userError s!"Version mismatch. expected {version}, got {out}"
+  else
+    IO.println s!"Version check passed: {out}"
+
 /-- run test by `lake test` -/
 @[test_driver] script test do
+  checkVersionString
   runCmd "lake exe mdgen Test/Src Test/Out"
   runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
   runCmd "lean --run Test.lean"
