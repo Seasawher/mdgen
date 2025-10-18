@@ -35,9 +35,10 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * You can convert a doc comment to a block comment. Simply insert `/-⋆-/` immediately before the doc comment `/-- foo -/` without any whitespace.
 
-* By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆LANG⋆=` on the first line of the code section.
-
-* If you write `-- ⋆QUOTE⋆` on the first line of the code, `> ` will be inserted at the beginning of every line in that code block, turning it into a quoted code block.
+* metadata for code blocks:
+  * By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆LANG⋆=` on the first line of the code section.
+  * If you write `-- ⋆QUOTE⋆` on the first line of the code, `> ` will be inserted at the beginning of every line in that code block, turning it into a quoted code block.
+  * When you want to use both `⋆QUOTE⋆` and `⋆LANG⋆` at the same time, write `⋆QUOTE⋆` first, separated by either a whitespace or a comma, as in `-- ⋆QUOTE⋆ ⋆LANG⋆=hoge`.
 
 If you want to know more details, check the test code.
 
