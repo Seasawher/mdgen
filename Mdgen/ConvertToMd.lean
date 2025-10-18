@@ -2,21 +2,22 @@ import Mdgen.Analyze
 import Mdgen.String
 import Mdgen.List
 
+/-- block type in markdown -/
+inductive TextType where
+  /-- ground text -/
+  | groundText
+  /-- code block -/
+  | codeBlock (lang : String) (quoted : Bool)
+deriving Repr
+
 /-- A chunk of grouped code for conversion to markdown. -/
 structure Block where
   /-- content of block -/
   content : String
 
-  /-- whether the `content` is converted into code section in markdown.
-
-  * `none` means the content is not a code block.
-  * `some lang` means the content is a code block with the given language.
-  -/
-  codeBlock : Option String
-
-  /-- whether the block is quoted -/
-  quoted : Bool
-  deriving Repr
+  /-- additional info -/
+  textType : TextType
+deriving Repr
 
 /-- Preprocess `RichLine` and extract metadata to be attached to code blocks -/
 def RichLine.handleLangMeta (line : RichLine) : RichLine × Option String :=
@@ -53,6 +54,7 @@ where
         else
           lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
       )
+      let isCodeBlock := level == 0
       let fstBlock : Block := {
         content := splited.fst
           |>.dropWhile (fun line => quoted && line.content == "")
@@ -60,8 +62,11 @@ where
           |>.map (fun raw_line => if quoted then "> " ++ raw_line else raw_line)
           |>.foldl (· ++ ·) ""
           |>.trim,
-        codeBlock := if level == 0 then some (lang?.getD "lean") else none
-        quoted := quoted
+        textType :=
+          if isCodeBlock then
+            TextType.codeBlock (lang?.getD "lean") quoted
+          else
+            TextType.groundText
       }
       helper splited.snd (fstBlock :: acc)
 
@@ -70,12 +75,12 @@ protected def Block.toString (b : Block) : String := Id.run do
   if b.content == "" then
     return "\n"
 
-  match b.codeBlock with
-  | some lang =>
-    match b.quoted with
+  match b.textType with
+  | .codeBlock lang quoted =>
+    match quoted with
     | false => s!"\n```{lang}\n" ++ b.content ++ "\n```\n\n"
     | true => s!"> ```{lang}\n" ++ b.content ++ "\n> ```\n"
-  | none =>
+  | .groundText =>
     let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
     b.content
       |> (String.drop · separator.length)
@@ -95,16 +100,17 @@ open System FilePath
 /-- Handle uniform internal link syntax.
 This converts `#{root}` in internal link to repeated `../` string -/
 def Block.handleUILStx (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
-  if b.codeBlock.isSome then
+  match b.textType with
+  | .codeBlock _ _ =>
     return b
-
-  let pathPrefix := relativePath outputFilePath outputDir
-    |>.drop 1
-    |>.map (· ++ "/")
-    |>.foldl (· ++ ·) ""
-  let newContent := b.content
-    |>.replace "#{root}/" pathPrefix
-  return {b with content := newContent}
+  | .groundText =>
+    let pathPrefix := relativePath outputFilePath outputDir
+      |>.drop 1
+      |>.map (· ++ "/")
+      |>.foldl (· ++ ·) ""
+    let newContent := b.content
+      |>.replace "#{root}/" pathPrefix
+    return {b with content := newContent}
 
 /-- convert lean contents to markdown contents. -/
 def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : String :=
@@ -117,8 +123,6 @@ def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Ar
     | _, _ => blocks
 
   mergeBlocks postProcessedBlocks
-
-
 
 set_option linter.unusedVariables false in
 
