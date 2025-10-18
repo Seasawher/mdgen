@@ -91,6 +91,12 @@ echo "Hello, world!"
 > ```
 > quoted code says something.
 
+> both quoted and language metadata
+> ```hoge
+> def quotedHoge := "hoge"
+> ```
+> quoted hoge says `hoge`.
+
 ## Uniform Internal Link Syntax
 
 * [link to Second.md](Second/Second.md)

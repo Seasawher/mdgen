@@ -12,6 +12,9 @@ structure RichLine where
 
   /-- whether the line ends with the closing symbol or not. -/
   close : Bool
+
+  /-- whether the line should be ignored when buiding `Block` -/
+  missing : Bool := false
 deriving Repr, BEq, Inhabited
 
 instance : ToString RichLine where

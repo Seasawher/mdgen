@@ -105,6 +105,15 @@ def greet := "hello, world"
 > quoted code says something.
 -/
 
+/-
+> both quoted and language metadata
+-/
+-- ⋆QUOTE⋆ ⋆LANG⋆=hoge
+def quotedHoge := "hoge"
+/-
+> quoted hoge says `hoge`.
+-/
+
 /- ## Uniform Internal Link Syntax
 
 * [link to Second.md](#{root}/Second/Second.md)

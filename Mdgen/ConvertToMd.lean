@@ -24,14 +24,20 @@ def RichLine.handleLangMeta (line : RichLine) : RichLine × Option String :=
   let token := "-- ⋆LANG⋆="
   if line.content.startsWith token then
     let lang := line.content.drop token.length
-    ({line with content := ""}, some lang)
+    ({line with missing := true}, some lang)
   else
     (line, none)
 
 /-- Preprocess `RichLine` and extract metadata for quotes -/
 def RichLine.handleQuote (line : RichLine) : RichLine × Bool :=
-  if line.content == "-- ⋆QUOTE⋆" then
-    ({line with content := ""}, true)
+  if line.content.startsWith "-- ⋆QUOTE⋆" then
+    let newLine := { line with
+      content := line.content
+        |>.replace "-- ⋆QUOTE⋆," "--"
+        |>.replace "-- ⋆QUOTE⋆" "--",
+      missing := true
+    }
+    (newLine, true)
   else
     (line, false)
 
@@ -43,11 +49,11 @@ where
     match lines with
     | [] => acc.reverse
     | line :: rest =>
-      let (line, lang?) := line.handleLangMeta
       let (line, quoted) := line.handleQuote
+      let (line, lang?) := line.handleLangMeta
       let lines := line :: rest
 
-      let ⟨_, level, _⟩ := line
+      let ⟨_, level, _, _⟩ := line
       let splited := (
         if level == 0 then
           lines.span (fun x => x.level == 0)
@@ -57,7 +63,7 @@ where
       let isCodeBlock := level == 0
       let fstBlock : Block := {
         content := splited.fst
-          |>.dropWhile (fun line => quoted && line.content == "")
+          |>.dropWhile (fun line => line.missing)
           |>.map (fun line => line.content ++ "\n")
           |>.map (fun raw_line => if quoted then "> " ++ raw_line else raw_line)
           |>.foldl (· ++ ·) ""
@@ -480,6 +486,48 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
   [str|
     "> hoge",
     "> ```lean",
+    "> def foo := 42",
+    "> ```",
+    "> foo is foo"
+  ]
+
+#eval
+  runTest
+  (title := "lang metadata with quoted code")
+  #[
+    "/-",
+    "> hoge",
+    "-/",
+    "-- ⋆QUOTE⋆ ⋆LANG⋆=hoge",
+    "def foo := 42",
+    "/-",
+    "> foo is foo",
+    "-/",
+  ]
+  [str|
+    "> hoge",
+    "> ```hoge",
+    "> def foo := 42",
+    "> ```",
+    "> foo is foo"
+  ]
+
+#eval
+  runTest
+  (title := "lang metadata with quoted code (comma syntax)")
+  #[
+    "/-",
+    "> hoge",
+    "-/",
+    "-- ⋆QUOTE⋆, ⋆LANG⋆=hoge",
+    "def foo := 42",
+    "/-",
+    "> foo is foo",
+    "-/",
+  ]
+  [str|
+    "> hoge",
+    "> ```hoge",
     "> def foo := 42",
     "> ```",
     "> foo is foo"
