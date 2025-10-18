@@ -56,6 +56,15 @@ example (h : P) : P ∨ Q := by
 -/
 macro "foo" : term => `(0)
 
+/-- test of code block in doc comment
+
+```lean
+example : hoge = 42 := by
+  rfl
+```
+-/
+def hoge := 42
+
 inductive MyNat where
   | zero
   | succ (n : MyNat)

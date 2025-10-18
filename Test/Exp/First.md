@@ -23,7 +23,7 @@ def hoge : Nat := 0
 ```
 This is an *italic text*.
 
-```lean
+````lean
 variable (P Q : Prop)
 
 example (hQ : Q) : P → Q := by
@@ -45,6 +45,15 @@ example (h : P) : P ∨ Q := by
 -/
 macro "foo" : term => `(0)
 
+/-- test of code block in doc comment
+
+```lean
+example : hoge = 42 := by
+  rfl
+```
+-/
+def hoge := 42
+
 inductive MyNat where
   | zero
   | succ (n : MyNat)
@@ -62,7 +71,7 @@ namespace MyNat
 end MyNat
 
 macro "echo" x:str : command => `(#eval $x)
-```
+````
 
 ## nested comment
 Here is a sample of nested block comment:
