@@ -6,8 +6,12 @@ import Mdgen.List
 inductive TextType where
   /-- ground text -/
   | groundText
-  /-- code block -/
-  | codeBlock (lang : String) (quoted : Bool)
+  /-- code block
+  * `lang`: language metadata for markdown code block
+  * `quoted`: whether the code block is quoted or not
+  * `nestedCode`: whether the code block contains nested code block or not
+  -/
+  | codeBlock (lang : String) (quoted nestedCode : Bool)
 deriving Repr
 
 /-- A chunk of grouped code for conversion to markdown. -/
@@ -41,40 +45,50 @@ def RichLine.handleQuote (line : RichLine) : RichLine × Bool :=
   else
     (line, false)
 
+/-- build a first `Block` from a list of `RichLine`s.
+This returns the first `Block` and the remaining `RichLine`s. -/
+def buildFstBlock (lines : List RichLine) : Block × List RichLine :=
+  let (line, quoted) := lines.head!.handleQuote
+  let (line, lang?) := line.handleLangMeta
+  let lines := line :: lines.tail!
+
+  let ⟨_, level, _, _⟩ := line
+  let splited := (
+    if level == 0 then
+      lines.span (fun x => x.level == 0)
+    else
+      lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
+  )
+  let isCodeBlock := level == 0
+  let nestedCode := splited.fst
+    |>.map (fun rline => rline.content)
+    |>.any (fun line => line.trimLeft.startsWith "```")
+  let fstBlock : Block := {
+    content := splited.fst
+      |>.dropWhile (fun line => line.missing)
+      |>.map (fun line => line.content ++ "\n")
+      |>.map (fun raw_line => if quoted then "> " ++ raw_line else raw_line)
+      |>.foldl (· ++ ·) ""
+      |>.trim,
+    textType :=
+      if isCodeBlock then
+        TextType.codeBlock (lang?.getD "lean") quoted nestedCode
+      else
+        TextType.groundText
+  }
+  (fstBlock, splited.snd)
+
 /-- build a `Block` from a `RichLine` -/
 partial def buildBlocks (lines : List RichLine) : List Block :=
-  helper lines []
+  buildBlocksAux [] lines
 where
-  helper (lines : List RichLine) (acc : List Block) : List Block :=
+  /-- Tail-recursive worker for `buildBlocks`. -/
+  buildBlocksAux (acc : List Block) (lines : List RichLine) : List Block :=
     match lines with
     | [] => acc.reverse
-    | line :: rest =>
-      let (line, quoted) := line.handleQuote
-      let (line, lang?) := line.handleLangMeta
-      let lines := line :: rest
-
-      let ⟨_, level, _, _⟩ := line
-      let splited := (
-        if level == 0 then
-          lines.span (fun x => x.level == 0)
-        else
-          lines.spanWithEdge (fun x => x.level > 1 || ! x.close)
-      )
-      let isCodeBlock := level == 0
-      let fstBlock : Block := {
-        content := splited.fst
-          |>.dropWhile (fun line => line.missing)
-          |>.map (fun line => line.content ++ "\n")
-          |>.map (fun raw_line => if quoted then "> " ++ raw_line else raw_line)
-          |>.foldl (· ++ ·) ""
-          |>.trim,
-        textType :=
-          if isCodeBlock then
-            TextType.codeBlock (lang?.getD "lean") quoted
-          else
-            TextType.groundText
-      }
-      helper splited.snd (fstBlock :: acc)
+    | _ =>
+      let (block, rest) := buildFstBlock lines
+      buildBlocksAux (block :: acc) rest
 
 /-- convert a `Block` intro a markdown snippet -/
 protected def Block.toString (b : Block) : String := Id.run do
@@ -82,10 +96,11 @@ protected def Block.toString (b : Block) : String := Id.run do
     return "\n"
 
   match b.textType with
-  | .codeBlock lang quoted =>
+  | .codeBlock lang quoted nestedCode =>
+    let codeBlockMarker := if nestedCode then "````" else "```"
     match quoted with
-    | false => s!"\n```{lang}\n" ++ b.content ++ "\n```\n\n"
-    | true => s!"> ```{lang}\n" ++ b.content ++ "\n> ```\n"
+    | false => s!"\n{codeBlockMarker}{lang}\n{b.content}\n{codeBlockMarker}\n\n"
+    | true => s!"> {codeBlockMarker}{lang}\n{b.content}\n> {codeBlockMarker}\n"
   | .groundText =>
     let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
     b.content
@@ -107,7 +122,7 @@ open System FilePath
 This converts `#{root}` in internal link to repeated `../` string -/
 def Block.handleUILStx (outputFilePath outputDir : FilePath) (b : Block) : Block := Id.run do
   match b.textType with
-  | .codeBlock _ _ =>
+  | .codeBlock _ _ _ =>
     return b
   | .groundText =>
     let pathPrefix := relativePath outputFilePath outputDir
@@ -531,4 +546,26 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
     "> def foo := 42",
     "> ```",
     "> foo is foo"
+  ]
+
+#eval
+  runTest
+  (title := "code block in doc comment")
+  #[
+    "/--",
+    "```lean",
+    "def foo := 42",
+    "```",
+    "-/",
+    "def bar := 22",
+  ]
+  [str|
+    "````lean",
+    "/--",
+    "```lean",
+    "def foo := 42",
+    "```",
+    "-/",
+    "def bar := 22",
+    "````"
   ]
