@@ -39,15 +39,9 @@ def runMdgenCmd (p : Parsed) : IO UInt32 := do
     createFile (path := outputFilePath) (content := newContent)
   return 0
 
-/-- version of this package (just Lean version)
-
-**note**: I got tired of manually updating the version,
-so I just reference the project’s Lean version. -/
-def versionString := s!"v{Lean.versionString}"
-
 /-- API definition of `mdgen` command -/
 def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; [versionString]
+  mdgen VIA runMdgenCmd; ["v4.25.0"]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:

@@ -41,8 +41,15 @@ def runCmd (input : String) : IO Unit := do
   let _ ← runCmdAux input
   return ()
 
+def checkVersion : IO Unit := do
+  let expectedVer := s!"v{Lean.versionString}"
+  let actualVer ← runCmdAux "lake exe mdgen --version"
+  if actualVer != expectedVer then
+    throw <| IO.userError s!"Version mismatch: expected {expectedVer}, got {actualVer}"
+
 /-- run test by `lake test` -/
 @[test_driver] script test do
+  checkVersion
   runCmd "lake exe mdgen Test/Src Test/Out"
   runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
   runCmd "lean --run Test.lean"
