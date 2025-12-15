@@ -50,7 +50,7 @@ partial def String.replaceEnclosed (line marker tgt : String) : String := Id.run
 
   let fst := occurence[0]!
   let snd := occurence[1]!
-  return line.take fst ++ tgt ++ replaceEnclosed (line.drop (snd + marker.length)) marker tgt
+  return (line.take fst).copy ++ tgt ++ replaceEnclosed (line.drop (snd + marker.length)).copy marker tgt
 
 #guard "/-+-/ hello /-+-/ world!".replaceEnclosed "/-+-/" "sorry" = "sorry world!"
 #guard
@@ -62,6 +62,6 @@ def String.replaceAfter (line tgt rep : String) : String :=
   let index? := line.findWhere tgt
   match index? with
   | none => line
-  | some index => line.take index ++ rep
+  | some index => (line.take index).copy ++ rep
 
 #guard "def foo /- sorry -/ := hoge".replaceAfter "/- sorry -/" "sorry" = "def foo sorry"

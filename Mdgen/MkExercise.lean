@@ -5,11 +5,11 @@ private def filterIgnored (lines : Array String) : Array String := Id.run do
   let mut result := #[]
   let mut ignoredBlock := false
   for line in lines do
-    if line.trim.endsWith "--##" then
+    if line.trimAscii.endsWith "--##" then
       continue
 
     -- ignore pattern for a block
-    if line.trim.endsWith "--##--" then
+    if line.trimAscii.endsWith "--##--" then
       ignoredBlock := ! ignoredBlock
       continue
     if ignoredBlock then
@@ -41,7 +41,7 @@ def mkExercise (content : Array String) : Array String := Id.run do
     if let some sorry_idx := line.findWhere "-- sorry" then
       listen := ! listen
       if ! listen then
-        result := result.push (line.take sorry_idx ++ "sorry")
+        result := result.push <| (line.take sorry_idx).copy ++ "sorry"
       continue
 
     if listen then

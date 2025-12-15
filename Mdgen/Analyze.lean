@@ -45,7 +45,7 @@ def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String :
   let token := "/-⋆-//--"
   let filtered : Array (Option Nat × String) :=
     lines.mapIdx (fun idx line =>
-      if line.trimLeft.startsWith token then
+      if line.trimAsciiStart.startsWith token then
         (some idx, line.replace token "/--")
       else
         (none, line)

@@ -27,7 +27,7 @@ deriving Repr
 def RichLine.handleLangMeta (line : RichLine) : RichLine × Option String :=
   let token := "-- ⋆LANG⋆="
   if line.content.startsWith token then
-    let lang := line.content.drop token.length
+    let lang := line.content.drop token.length |>.copy
     ({line with missing := true}, some lang)
   else
     (line, none)
@@ -62,14 +62,15 @@ def buildFstBlock (lines : List RichLine) : Block × List RichLine :=
   let isCodeBlock := level == 0
   let nestedCode := splited.fst
     |>.map (fun rline => rline.content)
-    |>.any (fun line => line.trimLeft.startsWith "```")
+    |>.any (fun line => line.trimAsciiStart.startsWith "```")
   let fstBlock : Block := {
     content := splited.fst
       |>.dropWhile (fun line => line.missing)
       |>.map (fun line => line.content ++ "\n")
       |>.map (fun raw_line => if quoted then "> " ++ raw_line else raw_line)
       |>.foldl (· ++ ·) ""
-      |>.trim,
+      |>.trimAscii
+      |>.copy,
     textType :=
       if isCodeBlock then
         TextType.codeBlock (lang?.getD "lean") quoted nestedCode
@@ -105,8 +106,9 @@ protected def Block.toString (b : Block) : String := Id.run do
     let separator := if b.content.startsWith "/-!" then "/-!" else "/-"
     b.content
       |> (String.drop · separator.length)
-      |> (String.dropRight · "-/".length)
-      |> String.trim
+      |> (String.Slice.dropEnd · "-/".length)
+      |> String.Slice.trimAscii
+      |>.copy
       |> (· ++ "\n")
 
 /-- merge blocks and build a markdown content -/
@@ -114,7 +116,7 @@ def mergeBlocks (blocks : List Block) : String :=
   let res := blocks
     |>.map Block.toString
     |>.foldl (· ++ ·) ""
-  res.trim ++ "\n"
+  res.trimAscii.copy ++ "\n"
 
 open System FilePath
 
