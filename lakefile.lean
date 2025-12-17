@@ -22,6 +22,7 @@ require Cli from git
 
 lean_exe «mdgen» where
   root := `Mdgen
+  supportInterpreter := true
 
 def runCmdAux (input : String) : IO String := do
   let cmdList := input.splitOn " "
@@ -35,7 +36,7 @@ def runCmdAux (input : String) : IO String := do
     IO.println out.stderr
     throw <| IO.userError s!"Failed to execute: {input}"
 
-  return out.stdout.trimRight
+  return out.stdout.trimAsciiEnd.copy
 
 def runCmd (input : String) : IO Unit := do
   let _ ← runCmdAux input

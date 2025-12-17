@@ -1,9 +1,11 @@
+module
+
 import Mdgen.File
 
 open System FilePath
 
 /-- intermediate data structure which is annotated syntax infomation -/
-structure RichLine where
+public structure RichLine where
   /-- text content -/
   content : String
 
@@ -21,7 +23,7 @@ instance : ToString RichLine where
   toString := RichLine.content
 
 /-- handle ignore pattern -/
-def filterIgnored (lines : Array String) : Array String := Id.run do
+public def filterIgnored (lines : Array String) : Array String := Id.run do
   let mut res := #[]
   let mut ignore := false
   for line in lines do
@@ -41,7 +43,7 @@ def filterIgnored (lines : Array String) : Array String := Id.run do
 * `indexes`: the indexes of lines which are converted from doc comment to block comment.
 * `contents`: the contents of lines after preprocessing.
 -/
-def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String := Id.run do
+public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String := Id.run do
   let token := "/-⋆-//--"
   let filtered : Array (Option Nat × String) :=
     lines.mapIdx (fun idx line =>
@@ -55,7 +57,7 @@ def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String :
   return (indexes, contents)
 
 /-- postprocess for converting doc comment to block comment -/
-def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : String) : String :=
+public def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : String) : String :=
   if indexes.contains i then
     line.replace "/--" "/-"
   else
@@ -64,7 +66,8 @@ def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : String) : S
 /-- Receive a array of codes and count the nesting of block and sectioning comments.
 The corresponding opening and closing brackets should have the same level.
 -/
-def analyze (lines : Array String) : List RichLine := Id.run do
+@[expose]
+public def analyze (lines : Array String) : List RichLine := Id.run do
   let (indexes, lines) := preprocessForDocToBlock (filterIgnored lines)
   let mut res : List RichLine := []
   let mut level := 0

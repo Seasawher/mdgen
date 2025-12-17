@@ -1,3 +1,5 @@
+module
+
 open String
 
 /-- Syntax for String with break lines.
@@ -16,7 +18,7 @@ macro_rules
   expected = actual
 
 /-- determines whether the string contains the given string and returns its first index -/
-def String.findWhere (line tgt : String) : Option Nat := Id.run do
+public def String.findWhere (line tgt : String) : Option Nat := Id.run do
   for i in [0 : line.length - tgt.length + 1] do
     let rest := line.drop i
     if rest.startsWith tgt then
@@ -28,7 +30,7 @@ def String.findWhere (line tgt : String) : Option Nat := Id.run do
 #guard "fuga fuga".findWhere "fuga" = some 0
 
 /-- determines whether the string contains the given string and returns its all indexes -/
-def String.findWhereAll (line tgt : String) : Array Nat := Id.run do
+public def String.findWhereAll (line tgt : String) : Array Nat := Id.run do
   let mut result := #[]
   for i in [0 : line.length - tgt.length + 1] do
     let rest := line.drop i
@@ -39,7 +41,7 @@ def String.findWhereAll (line tgt : String) : Array Nat := Id.run do
 #guard String.findWhereAll "fuga fuga" "fuga" = #[0, 5]
 
 /-- relace the part which is enclosed by `marker` with `tgt` -/
-partial def String.replaceEnclosed (line marker tgt : String) : String := Id.run do
+public partial def String.replaceEnclosed (line marker tgt : String) : String := Id.run do
   let occurence := findWhereAll line marker
 
   if occurence.size = 0 then
@@ -58,7 +60,8 @@ partial def String.replaceEnclosed (line marker tgt : String) : String := Id.run
   line.replaceEnclosed "/-+-/" "sorry" = "sorry greet sorry"
 
 /-- replace everything after `tgt` with `rep` -/
-def String.replaceAfter (line tgt rep : String) : String :=
+@[expose]
+public def String.replaceAfter (line tgt rep : String) : String :=
   let index? := line.findWhere tgt
   match index? with
   | none => line

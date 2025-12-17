@@ -1,6 +1,9 @@
-import Mdgen.Analyze
+module
+
+import all Mdgen.Analyze
 import Mdgen.String
-import Mdgen.List
+import all Mdgen.List
+public import Mdgen.File
 
 /-- block type in markdown -/
 inductive TextType where
@@ -136,7 +139,7 @@ def Block.handleUILStx (outputFilePath outputDir : FilePath) (b : Block) : Block
     return {b with content := newContent}
 
 /-- convert lean contents to markdown contents. -/
-def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : String :=
+public def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : String :=
   let blocks := buildBlocks <| analyze lines
 
   let postProcessedBlocks :=
