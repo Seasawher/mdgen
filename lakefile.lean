@@ -22,7 +22,6 @@ require Cli from git
 
 lean_exe «mdgen» where
   root := `Mdgen
-  supportInterpreter := true
 
 def runCmdAux (input : String) : IO String := do
   let cmdList := input.splitOn " "
