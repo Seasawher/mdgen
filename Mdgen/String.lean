@@ -60,7 +60,6 @@ public partial def String.replaceEnclosed (line marker tgt : String) : String :=
   line.replaceEnclosed "/-+-/" "sorry" = "sorry greet sorry"
 
 /-- replace everything after `tgt` with `rep` -/
-@[expose]
 public def String.replaceAfter (line tgt rep : String) : String :=
   let index? := line.findWhere tgt
   match index? with

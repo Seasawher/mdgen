@@ -8,7 +8,7 @@ public import Cli
 open Cli System FilePath
 
 /-- what `mdgen` does -/
-def runMdgenCmd (p : Parsed) : IO UInt32 := do
+public def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let inputDir : FilePath := p.positionalArg! "input_dir" |>.as! String
   let outputDir : FilePath := p.positionalArg! "output_dir" |>.as! String
 

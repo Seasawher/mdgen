@@ -66,7 +66,6 @@ public def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : Stri
 /-- Receive a array of codes and count the nesting of block and sectioning comments.
 The corresponding opening and closing brackets should have the same level.
 -/
-@[expose]
 public def analyze (lines : Array String) : List RichLine := Id.run do
   let (indexes, lines) := preprocessForDocToBlock (filterIgnored lines)
   let mut res : List RichLine := []
