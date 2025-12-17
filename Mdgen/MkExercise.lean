@@ -1,4 +1,6 @@
-import Mdgen.String
+module
+
+import all Mdgen.String
 
 /-- handle ignore pattern -/
 private def filterIgnored (lines : Array String) : Array String := Id.run do
@@ -30,7 +32,7 @@ private def filterIgnored (lines : Array String) : Array String := Id.run do
 
 /-- remove some content from the given content
 and replace it with `sorry` -/
-def mkExercise (content : Array String) : Array String := Id.run do
+public def mkExercise (content : Array String) : Array String := Id.run do
   let content := filterIgnored content
     |>.map (fun line => line.replaceAfter "/- sorry -/" "sorry")
     |>.map (fun line => line.replaceEnclosed "/-+-/" "sorry")
