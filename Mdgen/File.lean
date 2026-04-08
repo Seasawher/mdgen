@@ -1,5 +1,6 @@
 module
 
+public meta import Init.System.FilePath
 import all Mdgen.List
 
 open System FilePath
