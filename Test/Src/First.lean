@@ -70,14 +70,14 @@ inductive MyNat where
   | succ (n : MyNat)
 
 -- Here is a sample of converting doc comment to block comment
-/-⋆-//-- info: MyNat.zero : MyNat -/
+/-- info: MyNat.zero : MyNat -/
 #guard_msgs in --#
 #check MyNat.zero
 
 namespace MyNat
   /- ## indent block -/
 
-  /-⋆-//-- info: zero.succ : MyNat -/
+  /-- info: zero.succ : MyNat -/
   #guard_msgs in --#
   #check MyNat.succ MyNat.zero
 

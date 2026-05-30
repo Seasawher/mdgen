@@ -222,6 +222,69 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
   ]
 
 #eval runTest
+  (title := "doc comment before guard_msgs")
+  #[
+    "/-- info: zero : Nat -/",
+    "#guard_msgs in --#",
+    "#check 0"
+  ]
+  [str|
+    "```lean",
+    "/- info: zero : Nat -/",
+    "#check 0",
+    "```"
+  ]
+
+#eval runTest
+  (title := "multi line doc comment before guard_msgs")
+  #[
+    "/-- info:",
+    "zero : Nat -/",
+    "#guard_msgs in --#",
+    "#check 0"
+  ]
+  [str|
+    "```lean",
+    "/- info:",
+    "zero : Nat -/",
+    "#check 0",
+    "```"
+  ]
+
+#eval runTest
+  (title := "indented doc comment before guard_msgs")
+  #[
+    "namespace Foo",
+    "  /-- info: zero : Nat -/",
+    "  #guard_msgs in --#",
+    "  #check 0",
+    "end Foo"
+  ]
+  [str|
+    "```lean",
+    "namespace Foo",
+    "  /- info: zero : Nat -/",
+    "  #check 0",
+    "end Foo",
+    "```"
+  ]
+
+#eval runTest
+  (title := "guard_msgs command without ignore marker is output")
+  #[
+    "/-- info: zero : Nat -/",
+    "#guard_msgs",
+    "#check 0"
+  ]
+  [str|
+    "```lean",
+    "/-- info: zero : Nat -/",
+    "#guard_msgs",
+    "#check 0",
+    "```"
+  ]
+
+#eval runTest
   (title := "block comment in doc comment")
   #[
     "/-- foo",
