@@ -79,6 +79,11 @@ inductive MyNat where
 #guard_msgs in --#
 #check MyNat.succ
 
+-- test for visible `#guard_msgs` command
+/-- info: 0 -/
+#guard_msgs in
+#eval Nat.zero
+
 namespace MyNat
   /- ## indent block -/
 

@@ -66,6 +66,11 @@ inductive MyNat where
 /- info: MyNat.succ (n : MyNat) : MyNat -/
 #check MyNat.succ
 
+-- test for visible `#guard_msgs` command
+/-- info: 0 -/
+#guard_msgs in
+#eval Nat.zero
+
 namespace MyNat
   /- ## indent block -/
 
