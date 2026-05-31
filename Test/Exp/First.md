@@ -62,11 +62,19 @@ inductive MyNat where
 /- info: MyNat.zero : MyNat -/
 #check MyNat.zero
 
+-- This is a test for hidden `#guard_msgs` command
+/- info: MyNat.succ (n : MyNat) : MyNat -/
+#check MyNat.succ
+
 namespace MyNat
   /- ## indent block -/
 
   /- info: zero.succ : MyNat -/
   #check MyNat.succ MyNat.zero
+
+  -- test for hidden `#guard_msgs` command in indent block
+  /- info: MyNat.succ (n : MyNat) : MyNat -/
+  #check MyNat.succ
 
 end MyNat
 

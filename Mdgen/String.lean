@@ -67,3 +67,11 @@ public def String.replaceAfter (line tgt rep : String) : String :=
   | some index => (line.take index).copy ++ rep
 
 #guard "def foo /- sorry -/ := hoge".replaceAfter "/- sorry -/" "sorry" = "def foo sorry"
+
+/-- Replace the first occurrence of `tgt` in `line` with `rep`. -/
+public def String.replaceFirst (line tgt rep : String) : String :=
+  match line.findWhere tgt with
+  | none => line
+  | some idx => (line.take idx).copy ++ rep ++ (line.drop (idx + tgt.length)).copy
+
+#guard "def Nat.zero := zero".replaceFirst "zero" "0" = "def Nat.0 := zero"

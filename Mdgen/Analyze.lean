@@ -45,12 +45,6 @@ private def Array.ensureIdx (indexes : Array Nat) (idx : Nat) : Array Nat :=
   else
     indexes.push idx
 
-/-- Replace the first occurrence of `tgt` in `line` with `rep`. -/
-private def replaceFirst (line tgt rep : String) : String :=
-  match line.findWhere tgt with
-  | none => line
-  | some idx => (line.take idx).copy ++ rep ++ (line.drop (idx + tgt.length)).copy
-
 /-- Find the start line of the doc comment immediately before a `#guard_msgs` command. -/
 private def findDocCommentStart? (lines : Array String) : Option Nat :=
   let rec go : List (String × Nat) → Option Nat
@@ -111,7 +105,7 @@ public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array S
 /-- postprocess for converting doc comment to block comment -/
 public def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : String) : String :=
   if indexes.contains i then
-    replaceFirst line "/--" "/-"
+    line.replaceFirst "/--" "/-"
   else
     line
 
