@@ -270,6 +270,21 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
   ]
 
 #eval runTest
+  (title := "hidden guard_msgs vs multi-line ignore pattern")
+  #[
+    "--#--",
+    "/-- info: zero : Nat -/",
+    "#guard_msgs in --#",
+    "--#--",
+    "#check 0"
+  ]
+  [str|
+    "```lean",
+    "#check 0",
+    "```"
+  ]
+
+#eval runTest
   (title := "guard_msgs command without ignore marker is in output")
   #[
     "/-- info: zero : Nat -/",
