@@ -38,8 +38,8 @@ public def filterIgnored (lines : Array String) : Array String := Id.run do
     res := res.push line
   return res
 
-/-- Push `idx` to `indexes` if it is not already included. -/
-private def pushIndex (indexes : Array Nat) (idx : Nat) : Array Nat :=
+/-- Ensure `idx` is present in `indexes`. -/
+private def Array.ensureIdx (indexes : Array Nat) (idx : Nat) : Array Nat :=
   if indexes.contains idx then
     indexes
   else
@@ -95,14 +95,14 @@ public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array S
     if ignoreLine && line.trimAsciiStart.startsWith "#guard_msgs" then
       match findDocCommentStart? contents with
       | none => pure ()
-      | some idx => indexes := pushIndex indexes idx
+      | some idx => indexes := indexes.ensureIdx idx
 
     if ignoreLine then
       continue
 
     let idx := contents.size
     if line.trimAsciiStart.startsWith token then
-      indexes := pushIndex indexes idx
+      indexes := indexes.ensureIdx idx
       contents := contents.push (line.replace token "/--")
     else
       contents := contents.push line
