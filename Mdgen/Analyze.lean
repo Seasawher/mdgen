@@ -1,6 +1,7 @@
 module
 
 import Mdgen.File
+import Mdgen.Array
 import all Mdgen.String
 
 open System FilePath
@@ -37,13 +38,6 @@ public def filterIgnored (lines : Array String) : Array String := Id.run do
       continue
     res := res.push line
   return res
-
-/-- Ensure `idx` is present in `indexes`. -/
-private def Array.ensureIdx (indexes : Array Nat) (idx : Nat) : Array Nat :=
-  if indexes.contains idx then
-    indexes
-  else
-    indexes.push idx
 
 /-- Find the start line of a doc comment ending at the last line in `lines`. -/
 private def findDocCommentStart? (lines : Array String) : Option Nat :=
@@ -89,14 +83,14 @@ public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array S
     if ignoreLine && line.trimAsciiStart.startsWith "#guard_msgs" then
       match findDocCommentStart? contents with
       | none => pure ()
-      | some idx => indexes := indexes.ensureIdx idx
+      | some idx => indexes := indexes.ensurePush idx
 
     if ignoreLine then
       continue
 
     let idx := contents.size
     if line.trimAsciiStart.startsWith token then
-      indexes := indexes.ensureIdx idx
+      indexes := indexes.ensurePush idx
       contents := contents.push (line.replace token "/--")
     else
       contents := contents.push line
