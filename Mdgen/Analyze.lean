@@ -1,6 +1,8 @@
 module
 
 import Mdgen.File
+import Mdgen.Array
+import all Mdgen.String
 
 open System FilePath
 
@@ -37,6 +39,28 @@ public def filterIgnored (lines : Array String) : Array String := Id.run do
     res := res.push line
   return res
 
+/-- Find the start line of a doc comment ending at the last line in `lines`. -/
+private def findDocCommentStart? (lines : Array String) : Option Nat :=
+  let rec go : List (String × Nat) → Option Nat
+    | [] => none
+    | (line, idx) :: rest =>
+      let trimmed := line.trimAsciiStart
+      if trimmed.startsWith "/--" then
+        some idx
+      else if trimmed.startsWith "/-" then
+        none
+      else
+        go rest
+
+  let indexed := lines.zipIdx.toList.reverse
+  match indexed with
+  | [] => none
+  | (last, _) :: _ =>
+    if !(last.trimAscii.endsWith "-/") then
+      none
+    else
+      go indexed
+
 /-- preprocess for converting doc comment to block comment
 
 #### Return
@@ -45,21 +69,37 @@ public def filterIgnored (lines : Array String) : Array String := Id.run do
 -/
 public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String := Id.run do
   let token := "/-⋆-//--"
-  let filtered : Array (Option Nat × String) :=
-    lines.mapIdx (fun idx line =>
-      if line.trimAsciiStart.startsWith token then
-        (some idx, line.replace token "/--")
-      else
-        (none, line)
-  )
-  let indexes := filtered.filterMap (·.fst)
-  let contents := filtered.map (·.snd)
+  let mut indexes : Array Nat := #[]
+  let mut contents : Array String := #[]
+  let mut ignore := false
+  for line in lines do
+    let ignoreLine := line.endsWith "--#"
+    if line.endsWith "--#--" then
+      ignore := ! ignore
+      continue
+    if ignore then
+      continue
+
+    if ignoreLine && line.trimAsciiStart.startsWith "#guard_msgs" then
+      match findDocCommentStart? contents with
+      | none => pure ()
+      | some idx => indexes := indexes.ensurePush idx
+
+    if ignoreLine then
+      continue
+
+    let idx := contents.size
+    if line.trimAsciiStart.startsWith token then
+      indexes := indexes.ensurePush idx
+      contents := contents.push (line.replace token "/--")
+    else
+      contents := contents.push line
   return (indexes, contents)
 
 /-- postprocess for converting doc comment to block comment -/
 public def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : String) : String :=
   if indexes.contains i then
-    line.replace "/--" "/-"
+    line.replaceFirst "/--" "/-"
   else
     line
 
@@ -67,7 +107,7 @@ public def postprocessForDocToBlock (indexes : Array Nat) (i : Nat) (line : Stri
 The corresponding opening and closing brackets should have the same level.
 -/
 public def analyze (lines : Array String) : List RichLine := Id.run do
-  let (indexes, lines) := preprocessForDocToBlock (filterIgnored lines)
+  let (indexes, lines) := preprocessForDocToBlock lines
   let mut res : List RichLine := []
   let mut level := 0
   let mut doc := false
