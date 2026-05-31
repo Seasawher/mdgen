@@ -35,7 +35,7 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * You can convert a doc comment to a block comment.
   * A doc comment immediately before `#guard_msgs in ... --#` is converted to a block comment automatically.
-  * [legacy] A doc comment immediately after `/-⋆-/` is converted to a block comment.
+  * [deprecated] A doc comment immediately after `/-⋆-/` is converted to a block comment.
 
 * By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆LANG⋆=` on the first line of the code section.
 

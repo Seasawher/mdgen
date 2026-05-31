@@ -45,7 +45,7 @@ private def Array.ensureIdx (indexes : Array Nat) (idx : Nat) : Array Nat :=
   else
     indexes.push idx
 
-/-- Find the start line of the doc comment immediately before a `#guard_msgs` command. -/
+/-- Find the start line of a doc comment ending at the last line in `lines`. -/
 private def findDocCommentStart? (lines : Array String) : Option Nat :=
   let rec go : List (String × Nat) → Option Nat
     | [] => none
