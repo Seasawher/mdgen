@@ -40,26 +40,13 @@ public def filterIgnored (lines : Array String) : Array String := Id.run do
   return res
 
 /-- Find the start line of a doc comment ending at the last line in `lines`. -/
-private def findDocCommentStart? (lines : Array String) : Option Nat :=
-  let rec go : List (String × Nat) → Option Nat
-    | [] => none
-    | (line, idx) :: rest =>
-      let trimmed := line.trimAsciiStart
-      if trimmed.startsWith "/--" then
-        some idx
-      else if trimmed.startsWith "/-" then
-        none
-      else
-        go rest
-
-  let indexed := lines.zipIdx.toList.reverse
-  match indexed with
-  | [] => none
-  | (last, _) :: _ =>
-    if !(last.trimAscii.endsWith "-/") then
-      none
-    else
-      go indexed
+private def findDocCommentStart? (lines : Array String) : Option Nat := Id.run do
+  let indexed := lines.zipIdx.toList
+  for (line, idx) in indexed.reverse do
+    let trimmed := line.trimAsciiStart
+    if trimmed.startsWith "/--" then
+      return some idx
+  return none
 
 /-- preprocess for converting doc comment to block comment
 
