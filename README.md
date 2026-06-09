@@ -33,9 +33,7 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 * Uniform internal link syntax is supported. You can write the path from the `output_dir` with the symbol `#{root}` in a markdown part. mdgen will automatically insert the required number of `../`. Thus links to the same file can be written in the same way regardless of where they are referenced from.
 
-* You can convert a doc comment to a block comment.
-  * A doc comment immediately before `#guard_msgs in ... --#` is converted to a block comment automatically.
-  * [deprecated] A doc comment immediately after `/-⋆-/` is converted to a block comment.
+* A doc comment immediately before `#guard_msgs in ... --#` is converted to a block comment automatically.
 
 * By default, code blocks are specified with the language `lean`, but you can attach any string as a metadata to the code block by writing it after `-- ⋆LANG⋆=` on the first line of the code section.
 

@@ -55,7 +55,6 @@ private def findDocCommentStart? (lines : Array String) : Option Nat := Id.run d
 * `contents`: the contents of lines after preprocessing.
 -/
 public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array String := Id.run do
-  let token := "/-⋆-//--"
   let mut indexes : Array Nat := #[]
   let mut contents : Array String := #[]
   let mut ignore := false
@@ -68,19 +67,13 @@ public def preprocessForDocToBlock (lines : Array String) : Array Nat × Array S
       continue
 
     if ignoreLine && line.trimAsciiStart.startsWith "#guard_msgs" then
-      match findDocCommentStart? contents with
-      | none => pure ()
-      | some idx => indexes := indexes.ensurePush idx
+      if let some idx := findDocCommentStart? contents then
+        indexes := indexes.ensurePush idx
 
     if ignoreLine then
       continue
 
-    let idx := contents.size
-    if line.trimAsciiStart.startsWith token then
-      indexes := indexes.ensurePush idx
-      contents := contents.push (line.replace token "/--")
-    else
-      contents := contents.push line
+    contents := contents.push line
   return (indexes, contents)
 
 /-- postprocess for converting doc comment to block comment -/

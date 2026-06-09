@@ -330,51 +330,6 @@ private def runTest (input : Array String) (expected : String) (title := "") : I
   ]
 
 #eval runTest
-  (title := "convert doc comment syntax")
-  #[
-    "/-⋆-//-- doc comment -/",
-    "def zero := 0"
-  ]
-  [str|
-    "```lean",
-    "/- doc comment -/",
-    "def zero := 0",
-    "```"
-  ]
-
-#eval runTest
-  (title := "convert doc comment syntax - multiline")
-  #[
-    "/-⋆-//-- doc comment",
-    "which is multiline -/",
-    "def zero := 0"
-  ]
-  [str|
-    "```lean",
-    "/- doc comment",
-    "which is multiline -/",
-    "def zero := 0",
-    "```"
-  ]
-
-#eval runTest
-  (title := "convert doc comment syntax - indent")
-  #[
-    "namespace Foo",
-    "  /-⋆-//-- doc comment -/",
-    "  def zero := 0",
-    "end Foo"
-  ]
-  [str|
-    "```lean",
-    "namespace Foo",
-    "  /- doc comment -/",
-    "  def zero := 0",
-    "end Foo",
-    "```"
-  ]
-
-#eval runTest
   (title := "multiple leading block comments in doc comment")
   #[
     "/-- foo",

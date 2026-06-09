@@ -69,11 +69,6 @@ inductive MyNat where
   | zero
   | succ (n : MyNat)
 
--- Here is a sample of converting doc comment to block comment
-/-⋆-//-- info: MyNat.zero : MyNat -/
-#guard_msgs in --#
-#check MyNat.zero
-
 -- This is a test for hidden `#guard_msgs` command
 /-- info: MyNat.succ (n : MyNat) : MyNat -/
 #guard_msgs in --#
@@ -86,10 +81,6 @@ inductive MyNat where
 
 namespace MyNat
   /- ## indent block -/
-
-  /-⋆-//-- info: zero.succ : MyNat -/
-  #guard_msgs in --#
-  #check MyNat.succ MyNat.zero
 
   -- test for hidden `#guard_msgs` command in indent block
   /-- info: MyNat.succ (n : MyNat) : MyNat -/
