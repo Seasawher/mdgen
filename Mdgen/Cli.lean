@@ -8,23 +8,33 @@ public import Cli
 
 open Cli System FilePath
 
+/-- Spinner frames for displaying progress -/
+def spinnerFrames : Array String :=
+  #["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+/-- Clears the current line in the terminal -/
+def IO.clearLine : IO Unit := do
+  IO.print "\r\x1b[2K"
+
 /-- what `mdgen` does -/
 public def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let inputDir : FilePath := p.positionalArg! "input_dir" |>.as! String
   let outputDir : FilePath := p.positionalArg! "output_dir" |>.as! String
 
+  let stdout ← IO.getStdout
   let paths ← getLeanFilePaths inputDir
+  let mut characterCount := 0
 
-  if p.hasFlag "count" then
-    let mut globalCount := 0
-    for path in paths do
-      let content ← IO.FS.lines path
-      let count := content.foldl (fun acc str => acc + str.length) 0
-      globalCount := globalCount + count
-    IO.println s!"The input Lean files contain a total of {globalCount} characters."
+  for (path, idx) in paths.zipIdx do
+    let frame := spinnerFrames[idx % spinnerFrames.size]!
+    stdout.putStr s!"\r{frame} Processing ..."
+    stdout.flush
 
-  for path in paths do
     let raw_content ← IO.FS.lines path
+
+    if p.hasFlag "count" then
+      let count := raw_content.foldl (fun acc str => acc + str.length) 0
+      characterCount := characterCount + count
 
     let content :=
       if p.hasFlag "exercise" then
@@ -40,6 +50,11 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
     let newContent := convertToMd (some outputFilePath) (some outputDir) content
     createFile (path := outputFilePath) (content := newContent)
+
+  IO.clearLine
+  if p.hasFlag "count" then
+    IO.println s!"The input Lean files contain a total of {characterCount} characters."
+  IO.println "markedown files generated successfully!"
   return 0
 
 private def version : String := run_io do
