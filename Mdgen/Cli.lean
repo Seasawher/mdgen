@@ -54,7 +54,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
   IO.clearLine
   if p.hasFlag "count" then
     IO.println s!"The input Lean files contain a total of {characterCount} characters."
-  IO.println "markedown files generated successfully!"
+  IO.println "markdown files generated successfully!"
   return 0
 
 private def version : String := run_io do
