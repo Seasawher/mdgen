@@ -33,10 +33,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
       else
         raw_content
 
-    let outputFilePath := outputFilePath
-      inputDir.components
-      outputDir.components
-      path.components
+    let outputFilePath := outputFilePath inputDir outputDir path
 
     let newContent := convertToMd (some outputFilePath) (some outputDir) content
     createFile (path := outputFilePath) (content := newContent)

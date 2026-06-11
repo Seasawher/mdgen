@@ -7,31 +7,25 @@ open System FilePath
 
 namespace System.FilePath
 
-/-- generate a filepath from path components -/
-public def ofComponents (l : List String) : FilePath :=
-  l |>.intersperse FilePath.pathSeparator.toString
-    |> List.foldl (· ++ ·) ""
-    |> FilePath.mk
-
 /-- a function which returns an output file path component
 given components of input and output directories. -/
-public def outputFilePath (inputDir : List String) (outputDir : List String)
-    (path : List String) : FilePath :=
-  let relativePath := path.diff inputDir
-  outputDir ++ relativePath
+public def outputFilePath (inputDir outputDir path : FilePath) : FilePath :=
+  let relativePath := path.components.diff inputDir.components
+  outputDir.components
+    |> (· ++ relativePath)
     |> List.map (String.replace · ".lean" ".md")
     |> List.filter (· ≠ ".")
-    |> ofComponents
+    |> mkFilePath
 
-#guard outputFilePath ["."] ["out"] ["foo.lean"] = ofComponents ["out", "foo.md"]
+#guard outputFilePath "." "out" "foo.lean" = mkFilePath ["out", "foo.md"]
 
-#guard outputFilePath ["src"] ["."] ["src", "foo.lean"] = ofComponents ["foo.md"]
+#guard outputFilePath "src" "." "src/foo.lean" = mkFilePath ["foo.md"]
 
-#guard outputFilePath ["src"] ["out"] ["src", "foo.lean"] = ofComponents ["out", "foo.md"]
+#guard outputFilePath "src" "out" "src/foo.lean" = mkFilePath ["out", "foo.md"]
 
-#guard outputFilePath ["test", "src"] ["test", "out"] ["test", "src", "foo.lean"] = ofComponents ["test", "out", "foo.md"]
+#guard outputFilePath "test/src" "test/out" "test/src/foo.lean" = mkFilePath ["test", "out", "foo.md"]
 
-#guard outputFilePath ["src"] ["out", "dist"] ["src", "foo", "bar.lean"] = ofComponents ["out", "dist", "foo", "bar.md"]
+#guard outputFilePath "src" "out/dist" "src/foo/bar.lean" = mkFilePath ["out", "dist", "foo", "bar.md"]
 
 /-- Recursively outputs a list of the paths of lean files contained
 in a directory whose path is `fp`. -/
