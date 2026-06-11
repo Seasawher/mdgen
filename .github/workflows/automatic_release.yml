@@ -1,0 +1,20 @@
+name: Automatic Release
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'lean-toolchain'
+
+jobs:
+  lean-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: lean-release-tag action
+      uses: leanprover-community/lean-release-tag@v1
+      with:
+        do-release: true
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

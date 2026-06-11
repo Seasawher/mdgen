@@ -1,5 +1,7 @@
 module
 
+open System
+
 /-- This is test for generated markdown files -/
 public def main : IO UInt32 := do
   let testTargets := [
@@ -27,6 +29,12 @@ public def main : IO UInt32 := do
     let expected ← IO.FS.readBinFile ⟨s!"Test/Src/Copy/{test_file}"⟩
     if actual != expected then
       IO.println s!"error: copied file {test_file} is not byte-identical"
+      return 1
+
+    -- check for ignored file
+    let ignoredFilePath : FilePath := ⟨"Test/Out/Ignored.md"⟩
+    if ← ignoredFilePath.pathExists then
+      IO.println s!"error: Ignored file {ignoredFilePath} should not be generated"
       return 1
 
   return 0
