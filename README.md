@@ -47,7 +47,7 @@ If you want to know more details, check the test code.
 
 ## CLI options
 
-* `--count`: Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate.
+* `--count`: Counts the total number of characters in the input Lean files.
 
 * `--copy`: Copies non-lean files from the input directory to the output directory. Otherwise, only `*.lean` files are processed, and the rest are ignored. But `*.md` files are always ignored so that you can avoid conflicts.
 
