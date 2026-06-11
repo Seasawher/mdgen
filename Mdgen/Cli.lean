@@ -50,7 +50,7 @@ public def mkMdgenCmd : Cmd := `[Cli|
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:
-    c, count; "Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate."
+    count; "Counts the total number of characters in the input Lean files."
     e, exercise; "Erases parts of Lean code and replaces them with sorry."
 
   ARGS:
