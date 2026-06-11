@@ -19,7 +19,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
     let mut globalCount := 0
     for path in paths do
       let content ← IO.FS.lines path
-      let count := content.foldl (fun acc str => acc + str.length) 0
+      let count := content.map String.length |>.sum
       globalCount := globalCount + count
     IO.println s!"The input Lean files contain a total of {globalCount} characters."
 
