@@ -13,7 +13,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
   let inputDir : FilePath := p.positionalArg! "input_dir" |>.as! String
   let outputDir : FilePath := p.positionalArg! "output_dir" |>.as! String
 
-  let paths ← getLeanFilePaths inputDir
+  let paths ← getAllLeanFilePaths inputDir
 
   if p.hasFlag "count" then
     let mut globalCount := 0
@@ -51,6 +51,7 @@ public def mkMdgenCmd : Cmd := `[Cli|
 
   FLAGS:
     count; "Counts the total number of characters in the input Lean files."
+    copy; "Files in inputDir other than .lean files are simply copied as-is into outputDir."
     e, exercise; "Erases parts of Lean code and replaces them with sorry."
 
   ARGS:

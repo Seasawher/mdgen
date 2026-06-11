@@ -27,13 +27,25 @@ public def outputFilePath (inputDir outputDir path : FilePath) : FilePath :=
 
 #guard outputFilePath "src" "out/dist" "src/foo/bar.lean" = mkFilePath ["out", "dist", "foo", "bar.md"]
 
-/-- Recursively outputs a list of the paths of lean files contained
-in a directory whose path is `fp`. -/
-public partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
-    IO $ Array FilePath := do
-  if ← fp.isDir then
-    (← fp.readDir).foldlM (fun acc dir => getLeanFilePaths dir.path acc) acc
-  else return if fp.extension == some "lean" then acc.push fp else acc
+/--
+Recursively get all file paths contained in a directory whose path is `path`.
+If `path` is a file, return an array containing only `path`.
+-/
+public partial def getAllFilePaths (path : FilePath) : IO (Array FilePath) := do
+  let mut results : Array FilePath := #[]
+  if ← path.isDir then
+    let entries ← path.readDir
+    for entry in entries do
+      results := results ++ (← getAllFilePaths entry.path)
+    return results
+  else
+    return #[path]
+
+/-- Recursively get all Lean file paths contained in a directory whose path is `path`.
+If `path` is a file, return an array containing only `path` if it is a Lean file. -/
+public def getAllLeanFilePaths (path : FilePath) : IO (Array FilePath) := do
+  let allFiles ← getAllFilePaths path
+  return allFiles.filter (fun fp => fp.extension == some "lean")
 
 /-- create a file with given path and content. -/
 public def createFile (path : FilePath) (content : String) : IO Unit := do
