@@ -47,7 +47,9 @@ If you want to know more details, check the test code.
 
 ## CLI options
 
-* `-c`, `--count`: Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate.
+* `--count`: Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate.
+
+* `--copy`: Copies non-lean files from the input directory to the output directory. Otherwise, only `*.lean` files are processed, and the rest are ignored.
 
 * `-e`, `--exercise`: Erases parts of Lean code and replaces them with `sorry`.
   * Replace the code enclosed by `-- sorry` with `sorry`, preserving indentation.
