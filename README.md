@@ -42,7 +42,7 @@ Don't forget to run `lake update mdgen` after editing the `lakefile`. And simply
 
 If you want to know more details, check the test code.
 
-* [source](./Test/Src/First.lean)
+* [source](./Test/Src/Raw/First.lean)
 * [expected output](./Test/Exp/First.md)
 
 ## CLI options
