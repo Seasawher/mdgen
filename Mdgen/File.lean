@@ -31,7 +31,7 @@ public def mkOutputFilePath (inputDir outputDir path : FilePath) : FilePath :=
     |> (· ++ relativePath)
     |> List.filter (· ≠ ".")
     |> mkFilePath
-  if fp.extension == some "lean" then
+  if fp.isLeanFile then
     fp.withExtension "md"
   else
     fp
