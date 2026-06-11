@@ -1,6 +1,6 @@
 module
 
-/-- This is a test for the markdown generator -/
+/-- This is test for generated markdown files -/
 public def main : IO UInt32 := do
   let testTargets := [
     "First.md",

@@ -38,7 +38,9 @@ def runCmdAux (input : String) : IO String := do
   return out.stdout.trimAsciiEnd.copy
 
 def runCmd (input : String) : IO Unit := do
-  let _ ← runCmdAux input
+  let out ← runCmdAux input
+  if out != "" then
+    IO.println out
   return ()
 
 def checkVersion : IO Unit := do
@@ -52,5 +54,8 @@ def checkVersion : IO Unit := do
   checkVersion
   runCmd "lake exe mdgen Test/Src Test/Out"
   runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
+  let out ← runCmdAux "lake exe mdgen --count Test/Src/Count.lean Test/Out/Count.md"
+  if ! out.contains "100" then
+    throw <| IO.userError s!"Count mismatch: expected 100 characters"
   runCmd "lean --run Test.lean"
   return 0
