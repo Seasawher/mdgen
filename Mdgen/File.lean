@@ -5,10 +5,16 @@ import all Mdgen.List
 
 open System FilePath
 
+/-- copy the content of a file from `src` to `dst`.
+This function do't use `String` operations so that it works for binary files as well. -/
+public def IO.FS.copyFile (src dst : FilePath) : IO Unit := do
+  let bytes ← IO.FS.readBinFile src
+  IO.FS.writeBinFile dst bytes
+
 namespace System.FilePath
 
 /-- Checks if a file path has a `.lean` extension. -/
-def isLeanFile (path : FilePath) : Bool :=
+public def isLeanFile (path : FilePath) : Bool :=
   path.extension == some "lean"
 
 /-- a function which returns an output file path component
@@ -48,12 +54,6 @@ public partial def getAllFilePaths (path : FilePath) : IO (Array FilePath) := do
   else
     return #[path]
 
-/-- Recursively get all Lean file paths contained in a directory whose path is `path`.
-If `path` is a file, return an array containing only `path` if it is a Lean file. -/
-public def getAllLeanFilePaths (path : FilePath) : IO (Array FilePath) := do
-  let allFiles ← getAllFilePaths path
-  return allFiles.filter isLeanFile
-
 /-- create a file with given path and content. -/
 public def createFile (path : FilePath) (content : String) : IO Unit := do
   match path.parent with
@@ -67,7 +67,6 @@ before reach `parentDir` from `childFile` -/
 public def relativePath (childFile parentDir : FilePath) : List String :=
   let childComponents := childFile.components
   let parentComponents := parentDir.components
-  childComponents.diff parentComponents
-    |>.map (fun _ => "..")
+  childComponents.diff parentComponents |>.map (fun _ => "..")
 
 end System.FilePath

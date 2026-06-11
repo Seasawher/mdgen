@@ -139,7 +139,7 @@ def Block.handleUILStx (outputFilePath outputDir : FilePath) (b : Block) : Block
     return {b with content := newContent}
 
 /-- convert lean contents to markdown contents. -/
-public def convertToMd (outputFilePath outputDir : Option FilePath := none) (lines : Array String) : String :=
+public def convertToMd (outputFilePath outputDir : Option FilePath) (lines : Array String) : String :=
   let blocks := buildBlocks <| analyze lines
 
   let postProcessedBlocks :=
@@ -154,7 +154,7 @@ set_option linter.unusedVariables false in
 
 /-- test for `convertToMd` -/
 private def runTest (input : Array String) (expected : String) (title := "") : IO Unit := do
-  let output := convertToMd (lines := input)
+  let output := convertToMd (outputFilePath := none) (outputDir := none) (lines := input)
   if output ≠ expected then
     throw <| .userError s!"test for \"{title}\" failed: \n{output}"
 
