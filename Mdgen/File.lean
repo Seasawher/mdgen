@@ -7,25 +7,32 @@ open System FilePath
 
 namespace System.FilePath
 
+/-- Checks if a file path has a `.lean` extension. -/
+def isLeanFile (path : FilePath) : Bool :=
+  path.extension == some "lean"
+
 /-- a function which returns an output file path component
 given components of input and output directories. -/
-public def outputFilePath (inputDir outputDir path : FilePath) : FilePath :=
+public def mkOutputFilePath (inputDir outputDir path : FilePath) : FilePath :=
   let relativePath := path.components.diff inputDir.components
-  outputDir.components
+  let fp : FilePath := outputDir.components
     |> (· ++ relativePath)
-    |> List.map (String.replace · ".lean" ".md")
     |> List.filter (· ≠ ".")
     |> mkFilePath
+  if fp.extension == some "lean" then
+    fp.withExtension "md"
+  else
+    fp
 
-#guard outputFilePath "." "out" "foo.lean" = mkFilePath ["out", "foo.md"]
+#guard mkOutputFilePath "." "out" "foo.lean" = mkFilePath ["out", "foo.md"]
 
-#guard outputFilePath "src" "." "src/foo.lean" = mkFilePath ["foo.md"]
+#guard mkOutputFilePath "src" "." "src/foo.lean" = mkFilePath ["foo.md"]
 
-#guard outputFilePath "src" "out" "src/foo.lean" = mkFilePath ["out", "foo.md"]
+#guard mkOutputFilePath "src" "out" "src/foo.lean" = mkFilePath ["out", "foo.md"]
 
-#guard outputFilePath "test/src" "test/out" "test/src/foo.lean" = mkFilePath ["test", "out", "foo.md"]
+#guard mkOutputFilePath "test/src" "test/out" "test/src/foo.lean" = mkFilePath ["test", "out", "foo.md"]
 
-#guard outputFilePath "src" "out/dist" "src/foo/bar.lean" = mkFilePath ["out", "dist", "foo", "bar.md"]
+#guard mkOutputFilePath "src" "out/dist" "src/foo/bar.lean" = mkFilePath ["out", "dist", "foo", "bar.md"]
 
 /--
 Recursively get all file paths contained in a directory whose path is `path`.
@@ -45,7 +52,7 @@ public partial def getAllFilePaths (path : FilePath) : IO (Array FilePath) := do
 If `path` is a file, return an array containing only `path` if it is a Lean file. -/
 public def getAllLeanFilePaths (path : FilePath) : IO (Array FilePath) := do
   let allFiles ← getAllFilePaths path
-  return allFiles.filter (fun fp => fp.extension == some "lean")
+  return allFiles.filter isLeanFile
 
 /-- create a file with given path and content. -/
 public def createFile (path : FilePath) (content : String) : IO Unit := do
