@@ -58,7 +58,7 @@ public def mkMdgenCmd : Cmd := `[Cli|
 
   FLAGS:
     count; "Counts the total number of characters in the input Lean files."
-    copy; "Files in inputDir other than .lean files are simply copied as-is into outputDir."
+    copy; "Files in inputDir other than .lean files are simply copied as-is into outputDir. But .md files are always ignored so that you can avoid conflicts."
     e, exercise; "Erases parts of Lean code and replaces them with sorry."
 
   ARGS:
