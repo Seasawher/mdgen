@@ -5,41 +5,60 @@ import all Mdgen.List
 
 open System FilePath
 
+/-- copy the content of a file from `src` to `dst`.
+This function do't use `String` operations so that it works for binary files as well. -/
+public def IO.FS.copyFile (src dst : FilePath) : IO Unit := do
+  let bytes ← IO.FS.readBinFile src
+  if let some parent := dst.parent then
+    IO.FS.createDirAll parent
+  IO.FS.writeBinFile dst bytes
+
 namespace System.FilePath
 
-/-- generate a filepath from path components -/
-public def ofComponents (l : List String) : FilePath :=
-  l |>.intersperse FilePath.pathSeparator.toString
-    |> List.foldl (· ++ ·) ""
-    |> FilePath.mk
+/-- Checks if a file path has a `.lean` extension. -/
+public def isLeanFile (path : FilePath) : Bool :=
+  String.toLower <$> path.extension == some "lean"
+
+/-- Checks if a file path has a `.md` extension. -/
+public def isMarkdownFile (path : FilePath) : Bool :=
+  String.toLower <$> path.extension == some "md"
 
 /-- a function which returns an output file path component
 given components of input and output directories. -/
-public def outputFilePath (inputDir : List String) (outputDir : List String)
-    (path : List String) : FilePath :=
-  let relativePath := path.diff inputDir
-  outputDir ++ relativePath
-    |> List.map (String.replace · ".lean" ".md")
+public def mkOutputFilePath (inputDir outputDir path : FilePath) : FilePath :=
+  let relativePath := path.components.diff inputDir.components
+  let fp : FilePath := outputDir.components
+    |> (· ++ relativePath)
     |> List.filter (· ≠ ".")
-    |> ofComponents
+    |> mkFilePath
+  if fp.isLeanFile then
+    fp.withExtension "md"
+  else
+    fp
 
-#guard outputFilePath ["."] ["out"] ["foo.lean"] = ofComponents ["out", "foo.md"]
+#guard mkOutputFilePath "." "out" "foo.lean" = mkFilePath ["out", "foo.md"]
 
-#guard outputFilePath ["src"] ["."] ["src", "foo.lean"] = ofComponents ["foo.md"]
+#guard mkOutputFilePath "src" "." "src/foo.lean" = mkFilePath ["foo.md"]
 
-#guard outputFilePath ["src"] ["out"] ["src", "foo.lean"] = ofComponents ["out", "foo.md"]
+#guard mkOutputFilePath "src" "out" "src/foo.lean" = mkFilePath ["out", "foo.md"]
 
-#guard outputFilePath ["test", "src"] ["test", "out"] ["test", "src", "foo.lean"] = ofComponents ["test", "out", "foo.md"]
+#guard mkOutputFilePath "test/src" "test/out" "test/src/foo.lean" = mkFilePath ["test", "out", "foo.md"]
 
-#guard outputFilePath ["src"] ["out", "dist"] ["src", "foo", "bar.lean"] = ofComponents ["out", "dist", "foo", "bar.md"]
+#guard mkOutputFilePath "src" "out/dist" "src/foo/bar.lean" = mkFilePath ["out", "dist", "foo", "bar.md"]
 
-/-- Recursively outputs a list of the paths of lean files contained
-in a directory whose path is `fp`. -/
-public partial def getLeanFilePaths (fp : FilePath) (acc : Array FilePath := #[]) :
-    IO $ Array FilePath := do
-  if ← fp.isDir then
-    (← fp.readDir).foldlM (fun acc dir => getLeanFilePaths dir.path acc) acc
-  else return if fp.extension == some "lean" then acc.push fp else acc
+/--
+Recursively get all file paths contained in a directory whose path is `path`.
+If `path` is a file, return an array containing only `path`.
+-/
+public partial def getAllFilePaths (path : FilePath) : IO (Array FilePath) := do
+  let mut results : Array FilePath := #[]
+  if ← path.isDir then
+    let entries ← path.readDir
+    for entry in entries do
+      results := results ++ (← getAllFilePaths entry.path)
+    return results
+  else
+    return #[path]
 
 /-- create a file with given path and content. -/
 public def createFile (path : FilePath) (content : String) : IO Unit := do
@@ -54,7 +73,6 @@ before reach `parentDir` from `childFile` -/
 public def relativePath (childFile parentDir : FilePath) : List String :=
   let childComponents := childFile.components
   let parentComponents := parentDir.components
-  childComponents.diff parentComponents
-    |>.map (fun _ => "..")
+  childComponents.diff parentComponents |>.map (fun _ => "..")
 
 end System.FilePath

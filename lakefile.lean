@@ -38,7 +38,9 @@ def runCmdAux (input : String) : IO String := do
   return out.stdout.trimAsciiEnd.copy
 
 def runCmd (input : String) : IO Unit := do
-  let _ ← runCmdAux input
+  let out ← runCmdAux input
+  if out != "" then
+    IO.println out
   return ()
 
 def checkVersion : IO Unit := do
@@ -50,7 +52,9 @@ def checkVersion : IO Unit := do
 /-- run test by `lake test` -/
 @[test_driver] script test do
   checkVersion
-  runCmd "lake exe mdgen Test/Src Test/Out"
-  runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
+  runCmd "lake exe mdgen Test/Src/Raw Test/Out"
+  runCmd "lake exe mdgen --exercise Test/Src/Exercise.lean Test/Out/Exercise.md"
+  runCmd "lake exe mdgen --copy Test/Src/Copy Test/Out"
+
   runCmd "lean --run Test.lean"
   return 0

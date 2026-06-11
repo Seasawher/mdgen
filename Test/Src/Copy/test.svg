@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="120" viewBox="0 0 300 120" role="img" aria-label="Test">
+  <rect width="300" height="120" fill="white"/>
+  <text x="150" y="65" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="40" fill="black">Test</text>
+</svg>
