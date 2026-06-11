@@ -17,11 +17,11 @@ namespace System.FilePath
 
 /-- Checks if a file path has a `.lean` extension. -/
 public def isLeanFile (path : FilePath) : Bool :=
-  path.extension == some "lean"
+  String.toLower <$> path.extension == some "lean"
 
 /-- Checks if a file path has a `.md` extension. -/
 public def isMarkdownFile (path : FilePath) : Bool :=
-  path.extension == some "md"
+  String.toLower <$> path.extension == some "md"
 
 /-- a function which returns an output file path component
 given components of input and output directories. -/
