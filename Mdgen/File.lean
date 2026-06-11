@@ -19,6 +19,10 @@ namespace System.FilePath
 public def isLeanFile (path : FilePath) : Bool :=
   path.extension == some "lean"
 
+/-- Checks if a file path has a `.md` extension. -/
+public def isMarkdownFile (path : FilePath) : Bool :=
+  path.extension == some "md"
+
 /-- a function which returns an output file path component
 given components of input and output directories. -/
 public def mkOutputFilePath (inputDir outputDir path : FilePath) : FilePath :=

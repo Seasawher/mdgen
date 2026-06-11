@@ -49,7 +49,7 @@ If you want to know more details, check the test code.
 
 * `--count`: Counts the total number of characters in the input Lean files. However, please be aware that the output may not be entirely accurate.
 
-* `--copy`: Copies non-lean files from the input directory to the output directory. Otherwise, only `*.lean` files are processed, and the rest are ignored.
+* `--copy`: Copies non-lean files from the input directory to the output directory. Otherwise, only `*.lean` files are processed, and the rest are ignored. But `*.md` files are always ignored so that you can avoid conflicts.
 
 * `-e`, `--exercise`: Erases parts of Lean code and replaces them with `sorry`.
   * Replace the code enclosed by `-- sorry` with `sorry`, preserving indentation.

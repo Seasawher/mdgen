@@ -15,7 +15,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
   let allFiles ← getAllFilePaths inputDir
   let leanFiles := allFiles.filter isLeanFile
-  let restFiles := allFiles.filter (fun fp => !isLeanFile fp)
+  let restFiles := allFiles.filter (fun fp => !isLeanFile fp && !isMarkdownFile fp)
 
   if p.hasFlag "count" then
     let mut globalCount := 0
