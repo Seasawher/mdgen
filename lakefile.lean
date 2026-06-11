@@ -54,8 +54,15 @@ def checkVersion : IO Unit := do
   checkVersion
   runCmd "lake exe mdgen Test/Src Test/Out"
   runCmd "lake exe mdgen --exercise Test/SrcEx Test/Out"
+
+  -- test for `--count` flag
   let out ← runCmdAux "lake exe mdgen --count Test/Src/Count.lean Test/Out/Count.md"
   if ! out.contains "100" then
-    throw <| IO.userError s!"Count mismatch: expected 100 characters"
+    throw <| IO.userError "Count mismatch: expected 100 characters"
+  let out ← runCmdAux "lake exe mdgen Test/Src/Count.lean Test/Out/Count.md"
+  if out.contains "100" then
+    throw <| IO.userError "Misbehavior: counting should only occur with --count flag"
+
+  runCmd "lake exe mdgen --copy Test/Src Test/Out"
   runCmd "lean --run Test.lean"
   return 0
