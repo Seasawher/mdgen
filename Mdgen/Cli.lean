@@ -3,7 +3,6 @@ module
 import Mdgen.File
 import Mdgen.ConvertToMd
 import Mdgen.MkExercise
-public meta import Mdgen.RunIO
 public import Cli
 
 open Cli System FilePath
