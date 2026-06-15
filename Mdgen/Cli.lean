@@ -3,7 +3,6 @@ module
 import Mdgen.File
 import Mdgen.ConvertToMd
 import Mdgen.MkExercise
-public meta import Mdgen.RunIO
 public import Cli
 
 open Cli System FilePath
@@ -46,14 +45,9 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
       IO.FS.copyFile restFile outputFilePath
   return 0
 
-private def version : String := run_io do
-  let fullVersion ← IO.FS.readFile "./lean-toolchain"
-  let version := fullVersion.replace "leanprover/lean4:" ""
-  return version
-
 /-- API definition of `mdgen` command -/
 public def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; [version]
+  mdgen VIA runMdgenCmd; ["v4.31.0"]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:
