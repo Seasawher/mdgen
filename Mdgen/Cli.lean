@@ -3,9 +3,21 @@ module
 import Mdgen.File
 import Mdgen.ConvertToMd
 import Mdgen.MkExercise
+import Lean
 public import Cli
 
 open Cli System FilePath
+open Lean Elab Term
+
+syntax (name := mdgenCliVersion) "mdgenCliVersion% " str : term
+
+@[term_elab mdgenCliVersion] def elabMdgenCliVersion : TermElab := fun stx expectedType? => do
+  let versionStx := stx[1]
+  let expectedVer := s!"v{Lean.versionString}"
+  let actualVer := versionStx.getString
+  if actualVer != expectedVer then
+    Lean.Meta.Tactic.TryThis.addSuggestion versionStx { suggestion := Syntax.mkStrLit expectedVer }
+  elabTerm versionStx expectedType?
 
 /-- what `mdgen` does -/
 public def runMdgenCmd (p : Parsed) : IO UInt32 := do
@@ -47,7 +59,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
 
 /-- API definition of `mdgen` command -/
 public def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; ["v4.32.0-rc1"]
+  mdgen VIA runMdgenCmd; [mdgenCliVersion% "v4.32.0-rc1"]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:

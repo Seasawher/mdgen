@@ -47,9 +47,7 @@ def checkVersion : IO Unit := do
   let expectedVer := s!"v{Lean.versionString}"
   let actualVer ← runCmdAux "lake exe mdgen --version"
   if actualVer != expectedVer then
-    throw <| IO.userError
-      s!"Version mismatch: expected {expectedVer}, got {actualVer}\n\
-      Try this: update the mdgen CLI version string literal in Mdgen/Cli.lean to \"{expectedVer}\"."
+    throw <| IO.userError s!"Version mismatch: expected {expectedVer}, got {actualVer}"
 
 /-- run test by `lake test` -/
 @[test_driver] script test do
