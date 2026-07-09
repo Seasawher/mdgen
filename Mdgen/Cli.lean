@@ -16,7 +16,9 @@ syntax (name := mdgenCliVersion) "mdgenCliVersion% " str : term
   let expectedVer := s!"v{Lean.versionString}"
   let actualVer := versionStx.getString
   if actualVer != expectedVer then
-    Lean.Meta.Tactic.TryThis.addSuggestion versionStx { suggestion := Syntax.mkStrLit expectedVer }
+    Lean.Meta.Tactic.TryThis.addSuggestion
+      (ref := versionStx)
+      { suggestion := Syntax.mkStrLit expectedVer }
   elabTerm versionStx expectedType?
 
 /-- what `mdgen` does -/
