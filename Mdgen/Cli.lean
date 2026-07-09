@@ -15,7 +15,7 @@ syntax (name := mdgenCliVersion) "mdgenCliVersion% " str : term
 Term elaborator for `mdgenCliVersion%` that checks whether the CLI version string literal
 matches the current Lean version and emits a TryThis replacement suggestion when it does not.
 -/
-@[term_elab mdgenCliVersion] def elabMdgenCliVersion : TermElab := fun stx expectedType? => do
+@[term_elab mdgenCliVersion] def mdgenCliVersionElab : TermElab := fun stx expectedType? => do
   let versionStx ←
     match stx with
     | `(mdgenCliVersion% $ver:str) => pure ver
