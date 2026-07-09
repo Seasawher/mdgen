@@ -19,7 +19,7 @@ syntax (name := mdgenCliVersion) "mdgenCliVersion% " str : term
     Lean.Meta.Tactic.TryThis.addSuggestion
       (ref := versionStx)
       { suggestion := Syntax.mkStrLit expectedVer }
-      (header := s!"mdgen CLI version mismatch (expected {expectedVer}, got {actualVer}). Try this:")
+      (header := s!"mdgen CLI version mismatch (expected {expectedVer}, got {actualVer}).")
   elabTerm versionStx expectedType?
 
 /-- what `mdgen` does -/
