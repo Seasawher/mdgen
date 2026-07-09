@@ -23,7 +23,7 @@ matches the current Lean version and emits a TryThis replacement suggestion when
     Lean.Meta.Tactic.TryThis.addSuggestion
       (ref := versionStx)
       { suggestion := Syntax.mkStrLit expectedVer }
-      (header := s!"mdgen CLI version mismatch (expected {expectedVer}, got {actualVer})")
+      (header := s!"mdgen CLI version mismatch: found {actualVer}, expected {expectedVer}")
   elabTerm versionStx expectedType?
 
 /-- what `mdgen` does -/
