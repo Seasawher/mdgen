@@ -4,6 +4,7 @@ import Mdgen.File
 import Mdgen.ConvertToMd
 import Mdgen.MkExercise
 public import Cli
+public meta import Mdgen.VersionString
 
 open Cli System FilePath
 
@@ -45,9 +46,11 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
       IO.FS.copyFile restFile outputFilePath
   return 0
 
+private def versionStr := version% "v4.33.0-rc1"
+
 /-- API definition of `mdgen` command -/
 public def mkMdgenCmd : Cmd := `[Cli|
-  mdgen VIA runMdgenCmd; ["v4.32.0"]
+  mdgen VIA runMdgenCmd; [versionStr]
   "mdgen is a tool to generate .md files from .lean files."
 
   FLAGS:
