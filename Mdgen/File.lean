@@ -6,7 +6,7 @@ import all Mdgen.List
 open System FilePath
 
 /-- copy the content of a file from `src` to `dst`.
-This function do't use `String` operations so that it works for binary files as well. -/
+This function doesn't use `String` operations so that it works for binary files as well. -/
 public def IO.FS.copyFile (src dst : FilePath) : IO Unit := do
   let bytes ← IO.FS.readBinFile src
   if let some parent := dst.parent then
