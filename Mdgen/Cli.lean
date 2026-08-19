@@ -46,7 +46,7 @@ public def runMdgenCmd (p : Parsed) : IO UInt32 := do
       IO.FS.copyFile restFile outputFilePath
   return 0
 
-private def versionStr := version% "v4.33.0"
+private def versionStr := version% "v4.34.0-rc1"
 
 /-- API definition of `mdgen` command -/
 public def mkMdgenCmd : Cmd := `[Cli|
